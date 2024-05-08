@@ -1,0 +1,7 @@
+{
+  "name": "CoroAppAdminWeb",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular"
+}
