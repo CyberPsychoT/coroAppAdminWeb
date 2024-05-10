@@ -1,0 +1,36 @@
+<ion-content [fullscreen]="true">
+  <div class="contenido">
+    <div class="interior">
+      <div class="bienvenido">
+        <ion-title>Administrador!</ion-title>
+        <p>Ingresa con tu cuenta de administrador</p>
+      </div>
+
+      <form [formGroup]="formLogin" (ngSubmit)="onSubmit()">
+        <div class="ion-padding">
+          <ion-item>
+            <ion-input
+              type="text"
+              formControlName="email"
+              placeholder="Correo electrónico"
+            ></ion-input>
+
+            <ion-icon name="person-outline"></ion-icon> </ion-item
+          ><br /><br />
+          <ion-item>
+            <ion-input
+              type="password"
+              formControlName="password"
+              placeholder="Contraseña"
+            ></ion-input>
+
+            <ion-icon name="lock-closed-outline"></ion-icon>
+          </ion-item>
+        </div>
+        <div class="button">
+          <ion-button color="secondary" type="submit">Enviar</ion-button>
+        </div>
+      </form>
+    </div>
+  </div>
+</ion-content>

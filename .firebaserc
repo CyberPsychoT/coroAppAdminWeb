@@ -1,0 +1,14 @@
+{
+  "targets": {
+    "coroapp-ad7af": {
+      "hosting": {
+        "app": [
+          "coroapp-ad7af"
+        ]
+      }
+    }
+  },
+  "projects": {
+    "default": "coroapp-ad7af"
+  }
+}

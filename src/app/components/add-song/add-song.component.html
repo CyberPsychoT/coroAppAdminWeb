@@ -1,0 +1,55 @@
+<!-- add-song.component.html -->
+<ion-content>
+  <form [formGroup]="formAddSong" (ngSubmit)="onSubmit()">
+    <ion-item>
+      <ion-label position="floating">Nombre</ion-label>
+      <ion-textarea
+        formControlName="name"
+        style="white-space: pre-wrap"
+      ></ion-textarea>
+    </ion-item>
+    <!-- INTRODUCCION -->
+    <ion-item>
+      <ion-label position="floating">Introduccion</ion-label>
+      <ion-textarea
+        formControlName="introduction"
+        style="white-space: pre-wrap"
+      ></ion-textarea>
+    </ion-item>
+    <!-- LETRA 1 -->
+    <ion-item>
+      <ion-label position="floating">Letra de la Canción</ion-label>
+      <ion-textarea
+        formControlName="letter1"
+        style="white-space: pre-wrap"
+      ></ion-textarea>
+    </ion-item>
+    <!-- INTERLUDIO -->
+    <ion-item>
+      <ion-label position="floating">interludio</ion-label>
+      <ion-textarea
+        formControlName="interlude"
+        style="white-space: pre-wrap"
+      ></ion-textarea>
+    </ion-item>
+    <!-- LETRA 2 -->
+    <ion-item>
+      <ion-label position="floating">Letra de la cancion2</ion-label>
+      <ion-textarea
+        formControlName="letter2"
+        style="white-space: pre-wrap"
+      ></ion-textarea>
+    </ion-item>
+    <!-- FINAL -->
+    <ion-item>
+      <ion-label position="floating">Final</ion-label>
+      <ion-textarea
+        formControlName="end"
+        style="white-space: pre-wrap"
+      ></ion-textarea>
+    </ion-item>
+
+    <ion-button type="submit">Enviar</ion-button>
+  </form>
+</ion-content>
+<ion-button (click)="close()">Cerrar</ion-button>

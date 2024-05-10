@@ -1,4 +1,9 @@
 import { Component } from '@angular/core';
+import { AuthService } from './services/auth.service';
+import { ToastController } from '@ionic/angular';
+import { Router } from '@angular/router';
+import { Subscription } from 'rxjs';
+
 @Component({
   selector: 'app-root',
   templateUrl: 'app.component.html',
@@ -6,13 +11,54 @@ import { Component } from '@angular/core';
 })
 export class AppComponent {
   public appPages = [
-    { title: 'Inbox', url: '/folder/inbox', icon: 'mail' },
-    { title: 'Outbox', url: '/folder/outbox', icon: 'paper-plane' },
-    { title: 'Favorites', url: '/folder/favorites', icon: 'heart' },
-    { title: 'Archived', url: '/folder/archived', icon: 'archive' },
-    { title: 'Trash', url: '/folder/trash', icon: 'trash' },
-    { title: 'Spam', url: '/folder/spam', icon: 'warning' },
+    { title: 'Canciones', url: '/admin/dashboard', icon: 'newspaper' },
+    { title: 'Lista semanal', url: '/admin/list-week', icon: 'newspaper' },
   ];
-  public labels = ['Family', 'Friends', 'Notes', 'Work', 'Travel', 'Reminders'];
-  constructor() {}
+  userName: string | null = null;
+  userCargo: string | null = null;
+
+  private userNameSubscription: Subscription;
+
+  constructor(
+    private authService: AuthService,
+    private toastController: ToastController,
+    private router: Router
+  ) {
+    (this.userNameSubscription = this.authService.userName$.subscribe(
+      (name) => {
+        this.userName = name;
+      }
+    )),
+      this.authService.userCargo$.subscribe((cargo) => {
+        this.userCargo = cargo;
+      });
+  }
+
+  //Toast
+  async presentToast(message: string, position: 'bottom', color: string) {
+    const toast = await this.toastController.create({
+      message: message,
+      duration: 2000,
+      position: position,
+      color: color,
+    });
+
+    await toast.present();
+  }
+
+  logouth() {
+    this.authService
+      .logout()
+      .then(() => {
+        this.presentToast('Sesion finalizada correctamente', 'bottom', 'dark');
+        this.router.navigate(['auth/login']);
+      })
+      .catch((error) => console.log(error));
+  }
+
+  ngOnDestroy() {
+    if (this.userNameSubscription) {
+      this.userNameSubscription.unsubscribe();
+    }
+  }
 }
