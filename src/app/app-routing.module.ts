@@ -6,6 +6,7 @@ import {
   ReactivateMenuGuard,
 } from './guards/no-side-menu.guard';
 import { AddSongComponent } from './components/add-song/add-song.component';
+import { AddListComponent } from './components/add-list/add-list.component';
 
 const routes: Routes = [
   {
@@ -39,6 +40,10 @@ const routes: Routes = [
   {
     path: 'components/add-song',
     component: AddSongComponent,
+  },
+  {
+    path: 'components/add-list',
+    component: AddListComponent,
   },
 ];
 

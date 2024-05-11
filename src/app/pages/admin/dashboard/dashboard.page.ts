@@ -16,7 +16,7 @@ export class DashboardPage implements OnInit {
   songs: any[] = []; // Inicializa aquí para evitar errores similares
   filteredSongs: any[] = []; // Inicializado como un arreglo vacío
   searchTerm: string = '';
-  showCheckboxes: boolean = false;
+  selectedSongs: string[] = [];
 
   constructor(
     private router: Router,
@@ -73,10 +73,6 @@ export class DashboardPage implements OnInit {
 
   //Eliminar canciones por mayor
 
-  confirmDelete() {
-    this.showCheckboxes = true;
-  }
-
   deleteSelectedSongs() {
     this.songs
       .filter((song) => song.selected)
@@ -92,10 +88,18 @@ export class DashboardPage implements OnInit {
       });
 
     // Después de eliminar las canciones, ocultamos los checkboxes nuevamente
-    this.showCheckboxes = false;
   }
   cancelSelectedSongs() {
     this.filteredSongs.forEach((song) => (song.selected = false));
-    this.showCheckboxes = false; // También ocultamos los checkboxes
+  }
+
+  //Agregar canciones a lista
+  showLists() {
+    this.selectedSongs = this.songs
+      .filter((song) => song.selected)
+      .map((song) => song.id);
+    this.router.navigate(['admin/list-week'], {
+      queryParams: { selectedSongs: JSON.stringify(this.selectedSongs) },
+    });
   }
 }

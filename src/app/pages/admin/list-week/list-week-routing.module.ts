@@ -6,8 +6,13 @@ import { ListWeekPage } from './list-week.page';
 const routes: Routes = [
   {
     path: '',
-    component: ListWeekPage
-  }
+    component: ListWeekPage,
+  },
+  {
+    path: 'list/:id',
+    loadChildren: () =>
+      import('./list/list.module').then((m) => m.ListPageModule),
+  },
 ];
 
 @NgModule({
