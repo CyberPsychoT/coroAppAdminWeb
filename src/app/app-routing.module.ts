@@ -5,6 +5,7 @@ import {
   NoSideMenuGuard,
   ReactivateMenuGuard,
 } from './guards/no-side-menu.guard';
+import { AddSongComponent } from './components/add-song/add-song.component';
 
 const routes: Routes = [
   {
@@ -34,6 +35,10 @@ const routes: Routes = [
       ),
     ...canActivate(() => redirectUnauthorizedTo(['auth/login'])), // Firebase Auth Guard
     canActivate: [ReactivateMenuGuard], // Tu propio guardia
+  },
+  {
+    path: 'components/add-song',
+    component: AddSongComponent,
   },
 ];
 

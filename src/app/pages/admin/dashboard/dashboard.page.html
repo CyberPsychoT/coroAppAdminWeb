@@ -7,8 +7,9 @@
       placeholder="Buscar cancion"
       [(ngModel)]="searchTerm"
       (ionInput)="filterSongs()"
-    ></ion-searchbar
-    ><br /><br />
+    ></ion-searchbar>
+
+    <br /><br />
     <ion-list *ngFor="let song of filteredSongs">
       <ion-item>
         <ion-label (click)="openSongPage(song.id)">
@@ -43,11 +44,7 @@
         <ion-fab-button (click)="confirmDelete()" color="danger">
           <ion-icon name="trash"></ion-icon>
         </ion-fab-button>
-        <ion-fab-button
-          (click)="goToAddSong()"
-          (click)="openAddSongModal()"
-          color="success"
-        >
+        <ion-fab-button (click)="openAddSongModal()" color="success">
           <ion-icon name="add"></ion-icon>
         </ion-fab-button>
       </ion-fab-list>

@@ -29,7 +29,12 @@ export class DashboardPage implements OnInit {
     this.songs = [
       {
         name: '',
-        description: '',
+        introduction: '',
+        letter1: '',
+        interlude: '',
+        letter2: '',
+        end: '',
+        label: '',
       },
     ];
   }
@@ -37,7 +42,7 @@ export class DashboardPage implements OnInit {
   ngOnInit() {
     this.firestore.getSongs().subscribe((songs) => {
       this.songs = songs.sort((a, b) => a.name.localeCompare(b.name));
-      this.filteredSongs = this.songs; // Asegúrate de que las canciones están siendo copiadas correctamente
+      this.filteredSongs = this.songs;
     });
   }
 
@@ -61,15 +66,9 @@ export class DashboardPage implements OnInit {
     console.log(response);
   }
 
-  goToAddSong() {
-    this.firestore.triggerAddSong(true);
-  }
-
-  async openAddSongModal() {
-    const modal = await this.modalController.create({
-      component: AddSongComponent,
-    });
-    return await modal.present();
+  openAddSongModal() {
+    // Navigate to the AddSongComponent
+    this.router.navigate(['components/add-song']); // Make sure this route matches your actual route configuration
   }
 
   //Eliminar canciones por mayor

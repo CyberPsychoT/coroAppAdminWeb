@@ -2,7 +2,8 @@ import { Component } from '@angular/core';
 import { AuthService } from './services/auth.service';
 import { ToastController } from '@ionic/angular';
 import { Router } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { Subscription, finalize } from 'rxjs';
+import { FirestoreService } from './services/firestore.service';
 
 @Component({
   selector: 'app-root',
@@ -45,7 +46,7 @@ export class AppComponent {
 
     await toast.present();
   }
-
+  //Cierre de sesion
   logouth() {
     this.authService
       .logout()

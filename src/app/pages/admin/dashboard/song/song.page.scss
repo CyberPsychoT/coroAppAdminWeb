@@ -1,0 +1,30 @@
+ion-content {
+  .list-visualizer {
+    width: 375px;
+    // border: 1px solid;
+    border-color: var(--ion-color-medium);
+    margin: 20px 40px;
+    ion-item {
+      font-size: 20px;
+    }
+    p {
+      margin: 5px 15px;
+    }
+  }
+  .contenido {
+    margin: 20px;
+
+    .name-song {
+      color: var(--ion-color-medium);
+    }
+    .accordion {
+      border: 2px solid;
+      border-color: var(--ion-color-primary-shade);
+      width: 90%;
+    }
+  }
+  ion-button {
+    text-align: center;
+    align-items: center;
+  }
+}

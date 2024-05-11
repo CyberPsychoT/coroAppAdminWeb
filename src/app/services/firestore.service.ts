@@ -7,6 +7,7 @@ import {
   doc,
   deleteDoc,
   docData,
+  updateDoc,
 } from '@angular/fire/firestore';
 import { Observable } from 'rxjs';
 import { Song } from '../interfaces/song';
@@ -53,9 +54,9 @@ export class FirestoreService {
     const songDocRef = doc(this.firestore, `songs/${song.id}`);
     return deleteDoc(songDocRef);
   }
-
-  // Método para activar la apertura del componente AddSong
-  triggerAddSong(open: boolean) {
-    this.openAddSong.next(open);
+  // Actualiza una canción
+  updateSong(songId: string, songData: Partial<Song>) {
+    const songDocRef = doc(this.firestore, `songs/${songId}`);
+    return updateDoc(songDocRef, songData);
   }
 }

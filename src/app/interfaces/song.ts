@@ -12,4 +12,6 @@ export interface Song {
   letter2: string;
 
   end: string;
+
+  label: string;
 }
