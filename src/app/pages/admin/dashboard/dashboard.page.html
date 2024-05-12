@@ -6,8 +6,7 @@
       show-cancel-button="focus"
       placeholder="Buscar cancion"
       [(ngModel)]="searchTerm"
-      (ionInput)="filterSongs()"
-    ></ion-searchbar>
+      (ionInput)="filterSongs()"></ion-searchbar>
 
     <br /><br />
     <ion-list *ngFor="let song of filteredSongs">
@@ -15,19 +14,16 @@
         <ion-label (click)="openSongPage(song.id)">
           <ion-checkbox
             labelPlacement="start"
-            [(ngModel)]="song.selected"
-          ></ion-checkbox>
+            [(ngModel)]="song.selected"></ion-checkbox>
           <ion-icon name="musical-note-outline"></ion-icon> {{ song.name }}
         </ion-label>
       </ion-item>
     </ion-list>
 
-    <ion-button expand="block" (click)="deleteSelectedSongs()"
-      >Confirmar</ion-button
-    >
-    <ion-button expand="block" (click)="cancelSelectedSongs()"
-      >Volver</ion-button
-    >
+    <ion-button expand="block"
+      (click)="deleteSelectedSongs()">Confirmar</ion-button>
+    <ion-button expand="block"
+      (click)="cancelSelectedSongs()">Volver</ion-button>
 
     <ion-fab slot="fixed" vertical="bottom" horizontal="end" class="buttonFab">
       <ion-fab-button color="secondary">
@@ -41,7 +37,7 @@
           <ion-icon name="add"></ion-icon>
         </ion-fab-button>
         <ion-fab-button (click)="showLists()" color="success">
-          <ion-icon name="list-notes"></ion-icon>
+          <ion-icon name="list"></ion-icon>
         </ion-fab-button>
       </ion-fab-list>
     </ion-fab>
