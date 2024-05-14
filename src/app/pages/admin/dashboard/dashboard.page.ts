@@ -17,6 +17,7 @@ export class DashboardPage implements OnInit {
   filteredSongs: any[] = []; // Inicializado como un arreglo vacío
   searchTerm: string = '';
   selectedSongs: string[] = [];
+  showConfirmationButtons = false; // Controla la visibilidad de los botones de confirmar y volver
 
   constructor(
     private router: Router,
@@ -86,11 +87,45 @@ export class DashboardPage implements OnInit {
             console.error('Error deleting song:', error);
           });
       });
-
-    // Después de eliminar las canciones, ocultamos los checkboxes nuevamente
+    // Opcional: Ocultar los botones después de la eliminación
+    this.showConfirmationButtons = false;
   }
+
+  //Boton confirmar eliminacion
+  async presentDeleteConfirm() {
+    const alert = await this.alertController.create({
+      header: 'Confirmar Eliminación',
+      message:
+        '¿Estás seguro de que quieres eliminar las canciones seleccionadas?',
+      buttons: [
+        {
+          text: 'Cancelar',
+          role: 'cancel',
+          cssClass: 'secondary',
+          handler: (blah) => {
+            console.log('Confirm Cancel: blah');
+          },
+        },
+        {
+          text: 'Confirmar',
+          handler: () => {
+            this.deleteSelectedSongs(); // Llamar a la función de eliminación si el usuario confirma
+          },
+        },
+      ],
+    });
+
+    await alert.present();
+  }
+
   cancelSelectedSongs() {
     this.filteredSongs.forEach((song) => (song.selected = false));
+    // Ocultar los botones al cancelar
+    this.showConfirmationButtons = false;
+  }
+
+  toggleConfirmationButtons() {
+    this.showConfirmationButtons = !this.showConfirmationButtons;
   }
 
   //Agregar canciones a lista

@@ -5,6 +5,7 @@ import { switchMap } from 'rxjs/operators';
 import { FirestoreService } from 'src/app/services/firestore.service';
 import { List } from 'src/app/interfaces/list';
 import { Song } from 'src/app/interfaces/song';
+import { NavController } from '@ionic/angular';
 
 @Component({
   selector: 'app-list',
@@ -17,6 +18,7 @@ export class ListPage implements OnInit {
 
   constructor(
     private activatedRoute: ActivatedRoute,
+    private navCtrl: NavController,
     private firestoreService: FirestoreService
   ) {}
 
@@ -39,5 +41,9 @@ export class ListPage implements OnInit {
         });
       }
     });
+  }
+
+  openSongPage(songId: string) {
+    this.navCtrl.navigateForward(`admin/dashboard/song/${songId}`);
   }
 }

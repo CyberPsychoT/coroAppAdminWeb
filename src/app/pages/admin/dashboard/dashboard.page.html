@@ -9,39 +9,37 @@
       (ionInput)="filterSongs()"
     ></ion-searchbar>
 
+    <div *ngIf="showConfirmationButtons">
+      <ion-button (click)="presentDeleteConfirm()"> Confirmar </ion-button>
+      <ion-button (click)="cancelSelectedSongs()"> Volver </ion-button>
+    </div>
+
     <br /><br />
     <ion-list *ngFor="let song of filteredSongs">
       <ion-item>
         <ion-label (click)="openSongPage(song.id)">
-          <ion-checkbox
-            labelPlacement="start"
-            [(ngModel)]="song.selected"
-          ></ion-checkbox>
           <ion-icon name="musical-note-outline"></ion-icon> {{ song.name }}
         </ion-label>
+        <ion-checkbox
+          labelPlacement="end"
+          [(ngModel)]="song.selected"
+        ></ion-checkbox>
       </ion-item>
     </ion-list>
-
-    <ion-button expand="block" (click)="deleteSelectedSongs()"
-      >Confirmar</ion-button
-    >
-    <ion-button expand="block" (click)="cancelSelectedSongs()"
-      >Volver</ion-button
-    >
 
     <ion-fab slot="fixed" vertical="bottom" horizontal="end" class="buttonFab">
       <ion-fab-button color="secondary">
         <ion-icon name="chevron-up-circle"></ion-icon>
       </ion-fab-button>
       <ion-fab-list side="top">
-        <ion-fab-button color="danger">
+        <ion-fab-button color="danger" (click)="toggleConfirmationButtons()">
           <ion-icon name="trash"></ion-icon>
         </ion-fab-button>
         <ion-fab-button (click)="openAddSongModal()" color="success">
           <ion-icon name="add"></ion-icon>
         </ion-fab-button>
-        <ion-fab-button (click)="showLists()" color="success">
-          <ion-icon name="list-notes"></ion-icon>
+        <ion-fab-button (click)="showLists()" color="primary">
+          <ion-icon name="list"></ion-icon>
         </ion-fab-button>
       </ion-fab-list>
     </ion-fab>

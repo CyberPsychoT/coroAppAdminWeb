@@ -20,18 +20,23 @@
           labelPlacement="end"
           [(ngModel)]="list.selected"
         ></ion-checkbox>
-        <ion-button *ngIf="list.id" (click)="addSongsToList(list.id)"
-          >Añadir Canciones Aquí</ion-button
+        <ion-button
+          shape="round"
+          *ngIf="list.id && selectedSongs.length > 0"
+          (click)="presentAddConfirm(list.id)"
         >
+          <ion-icon slot="icon-only" name="add"></ion-icon>
+        </ion-button>
       </ion-item>
     </ion-list>
 
     <ion-button
       *ngIf="showCheckboxes"
       expand="block"
-      (click)="deleteSelectedLists()"
+      (click)="presentDeleteConfirm()"
       >Confirmar</ion-button
     >
+
     <ion-button
       *ngIf="showCheckboxes"
       expand="block"

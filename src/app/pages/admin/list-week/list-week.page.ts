@@ -4,6 +4,8 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { deleteDoc, doc } from '@firebase/firestore';
 import { FirestoreService } from 'src/app/services/firestore.service';
 import { List } from 'src/app/interfaces/list';
+import { AlertController, ToastController } from '@ionic/angular';
+import { first } from 'rxjs/operators';
 
 @Component({
   selector: 'app-list-week',
@@ -19,6 +21,8 @@ export class ListWeekPage implements OnInit {
 
   constructor(
     private router: Router,
+    private alertController: AlertController,
+    private toastController: ToastController,
     private firestore: FirestoreService,
     private activatedRoute: ActivatedRoute
   ) {}
@@ -61,7 +65,7 @@ export class ListWeekPage implements OnInit {
   openAddList() {
     this.router.navigate(['components/add-list']); // Make sure this route matches your actual route configuration
   }
-  //Eliminar canciones por mayor
+  //Eliminar listas por mayor
 
   confirmDelete() {
     this.showCheckboxes = true;
@@ -83,6 +87,34 @@ export class ListWeekPage implements OnInit {
       });
     this.showCheckboxes = false;
   }
+  //Aletar para la confirmacion
+
+  async presentDeleteConfirm() {
+    const alert = await this.alertController.create({
+      header: 'Confirmar Eliminación',
+      message:
+        '¿Estás seguro de que quieres eliminar las listas seleccionadas?',
+      buttons: [
+        {
+          text: 'Cancelar',
+          role: 'cancel',
+          cssClass: 'secondary',
+          handler: () => {
+            console.log('Eliminación cancelada');
+          },
+        },
+        {
+          text: 'Eliminar',
+          handler: () => {
+            this.deleteSelectedLists(); // Llamar a la función de eliminación si el usuario confirma
+            console.log('Listas eliminadas');
+          },
+        },
+      ],
+    });
+
+    await alert.present();
+  }
 
   cancelSelectedLists() {
     this.filteredLists.forEach((list) => (list.selected = false));
@@ -90,25 +122,64 @@ export class ListWeekPage implements OnInit {
   }
 
   //Agregar canciones a lista
-  addSongsToList(listId: string) {
+  async presentAddConfirm(listId: string) {
+    const alert = await this.alertController.create({
+      header: 'Confirmar adición',
+      message: '¿Deseas agregar las canciones seleccionadas a esta lista?',
+      buttons: [
+        {
+          text: 'Cancelar',
+          role: 'cancel',
+          handler: () => {
+            console.log('Adición cancelada');
+          },
+        },
+        {
+          text: 'Confirmar',
+          handler: () => {
+            this.addSongsToList(listId); // Llama a addSongsToList solo si confirma
+          },
+        },
+      ],
+    });
+
+    await alert.present();
+  }
+
+  async addSongsToList(listId: string) {
     if (!listId) {
       console.error('No list ID provided');
       return;
     }
-    this.firestore.getListById(listId).subscribe((list) => {
-      let updatedSongIds = list.songIds || [];
-      updatedSongIds = [
-        ...updatedSongIds,
-        ...this.selectedSongs.filter((id) => !updatedSongIds.includes(id)),
-      ];
-      this.firestore
-        .updateSongsInList(listId, updatedSongIds)
-        .then(() => {
-          console.log('Canciones añadidas con éxito');
-        })
-        .catch((error) => {
-          console.error('Error updating list:', error);
-        });
+    this.firestore
+      .getListById(listId)
+      .pipe(first())
+      .subscribe(async (list) => {
+        const songsToAdd = this.selectedSongs.filter((id) =>
+          !list.songIds ? [] : list.songIds.includes(id)
+        );
+        if (songsToAdd.length > 0) {
+          const updatedSongIds = [...list.songIds, ...songsToAdd];
+          this.firestore
+            .updateSongsInList(listId, updatedSongIds)
+            .then(async () => {
+              console.log('Canciones añadidas con éxito');
+              await this.presentToast(songsToAdd.length);
+            })
+            .catch((error) => {
+              console.error('Error updating list:', error);
+            });
+        } else {
+          console.log('No hay nuevas canciones para agregar.');
+        }
+      });
+  }
+
+  async presentToast(numSongs: number) {
+    const toast = await this.toastController.create({
+      message: `Se agregaron ${numSongs} canción(es) a la lista.`,
+      duration: 2000,
     });
+    toast.present();
   }
 }
