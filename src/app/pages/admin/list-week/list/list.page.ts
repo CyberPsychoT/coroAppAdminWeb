@@ -28,16 +28,14 @@ export class ListPage implements OnInit {
       if (listId) {
         this.firestoreService.getListById(listId).subscribe((list) => {
           this.list = list;
-          if (list.songIds) {
-            this.songs = [];
-            list.songIds.forEach((songId) => {
-              this.firestoreService.getSongById(songId).subscribe((song) => {
-                if (song) {
-                  this.songs.push(song);
-                }
-              });
+          this.songs = []; // Vacía el array antes de volver a cargarlo
+          list.songIds.forEach((songId) => {
+            this.firestoreService.getSongById(songId).subscribe((song) => {
+              if (song) {
+                this.songs.push(song);
+              }
             });
-          }
+          });
         });
       }
     });

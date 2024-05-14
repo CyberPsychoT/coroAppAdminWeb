@@ -13,4 +13,15 @@
       <ion-label>{{ song.name }}</ion-label>
     </ion-item>
   </ion-list>
+
+  <ion-fab slot="fixed" vertical="bottom" horizontal="end" class="buttonFab">
+    <ion-fab-button color="secondary">
+      <ion-icon name="chevron-up-circle"></ion-icon>
+    </ion-fab-button>
+    <ion-fab-list side="top">
+      <ion-fab-button color="danger">
+        <ion-icon name="create"></ion-icon>
+      </ion-fab-button>
+    </ion-fab-list>
+  </ion-fab>
 </ion-content>
