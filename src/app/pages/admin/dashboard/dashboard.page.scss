@@ -1,11 +1,31 @@
 .contenido {
-  margin: 50px;
-
-  .lista {
-    margin: -20px 0;
+  margin: 20px 50px;
+  .buttons {
+    display: flex;
+    justify-content: flex-end; /* Alinea los botones hacia la derecha */
+    ion-button {
+      margin: 0 20px; /* Ajusta el espacio entre los botones si es necesario */
+    }
   }
 
-  .buttonFab {
-    margin: 50px;
+  ion-col {
+    display: flex;
+    align-items: center; /* Centra verticalmente el contenido dentro de las columnas */
+  }
+
+  ion-col:first-child {
+    justify-content: flex-start; /* Alinea el título a la izquierda */
+  }
+
+  ion-col:nth-child(2) {
+    justify-content: center; /* Centra la barra de búsqueda */
+  }
+
+  ion-col:last-child {
+    justify-content: flex-end; /* Alinea los botones hacia la derecha */
+  }
+
+  .optionsDelete {
+    text-align: center;
   }
 }

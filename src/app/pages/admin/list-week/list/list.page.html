@@ -5,23 +5,34 @@
 </ion-header>
 
 <ion-content [fullscreen]="true">
-  <ion-list>
-    <ion-item
-      *ngFor="let song of songs"
-      (click)="song.id ? openSongPage(song.id) : null"
-    >
-      <ion-label>{{ song.name }}</ion-label>
+  <ng-container *ngFor="let section of sections">
+    <ion-item (click)="section.open = !section.open" color="pastel">
+      <ion-label>{{ section.name }}</ion-label>
+      <ion-icon
+        slot="end"
+        name="chevron-down-outline"
+        *ngIf="!section.open"
+      ></ion-icon>
+      <ion-icon
+        slot="end"
+        name="chevron-up-outline"
+        *ngIf="section.open"
+      ></ion-icon>
     </ion-item>
-  </ion-list>
-
-  <ion-fab slot="fixed" vertical="bottom" horizontal="end" class="buttonFab">
-    <ion-fab-button color="secondary">
-      <ion-icon name="chevron-up-circle"></ion-icon>
-    </ion-fab-button>
-    <ion-fab-list side="top">
-      <ion-fab-button color="danger">
-        <ion-icon name="create"></ion-icon>
-      </ion-fab-button>
-    </ion-fab-list>
-  </ion-fab>
+    <div *ngIf="section.open">
+      <ion-list>
+        <ion-item *ngFor="let song of section.songs">
+          <ion-label>{{ song.name }}</ion-label>
+          <ion-select
+            [(ngModel)]="songSections[song.id]"
+            (ionChange)="assignSongToSection(song, $event.detail.value)"
+          >
+            <ion-select-option *ngFor="let sec of sections" [value]="sec.name"
+              >{{ sec.name }}</ion-select-option
+            >
+          </ion-select>
+        </ion-item>
+      </ion-list>
+    </div>
+  </ng-container>
 </ion-content>

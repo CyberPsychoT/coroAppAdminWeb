@@ -137,7 +137,7 @@
         <form [formGroup]="songForm">
           <div class="contenido">
             <h1>
-              <ion-icon name="chevron-forward-outline"></ion-icon> Canción:
+              <ion-icon name="chevron-forward-outline"></ion-icon> Título:
               <ng-container *ngIf="isEditing; else viewModeName">
                 <ion-input formControlName="name" type="text"></ion-input>
               </ng-container>
@@ -169,7 +169,7 @@
               <!-- Acordeón para Letra Parte 1 -->
               <ion-accordion value="letter1">
                 <ion-item slot="header" color="secondary">
-                  <ion-label>Letra Parte 1</ion-label>
+                  <ion-label>Letra y acordes</ion-label>
                 </ion-item>
                 <div class="ion-padding" slot="content">
                   <ng-container *ngIf="isEditing; else viewModeLetter1">
@@ -208,7 +208,7 @@
 
               <ion-accordion value="letter2">
                 <ion-item slot="header" color="secondary">
-                  <ion-label>Letra Parte 2</ion-label>
+                  <ion-label>Letra y acordes</ion-label>
                 </ion-item>
                 <div class="ion-padding" slot="content">
                   <ng-container *ngIf="isEditing; else viewModeletter2">
@@ -263,13 +263,18 @@
                 </div>
               </ion-accordion>
             </ion-accordion-group>
+            <div class="buttons">
+              <ion-button *ngIf="!isEditing" (click)="startEditing()"
+                >Editar Canción</ion-button
+              >
+              <ion-button
+                *ngIf="isEditing"
+                (click)="updateSong()"
+                color="success"
+                >Guardar Cambios</ion-button
+              >
+            </div>
           </div>
-          <ion-button *ngIf="!isEditing" (click)="startEditing()"
-            >Editar Canción</ion-button
-          >
-          <ion-button *ngIf="isEditing" (click)="updateSong()"
-            >Guardar Cambios</ion-button
-          >
         </form>
       </ion-col>
     </ion-row>

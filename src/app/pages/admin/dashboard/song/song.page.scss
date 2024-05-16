@@ -1,6 +1,6 @@
 ion-content {
   .list-visualizer {
-    width: 375px;
+    width: 390px;
     // border: 1px solid;
     border-color: var(--ion-color-medium);
     margin: 20px 40px;
@@ -22,9 +22,10 @@ ion-content {
       border-color: var(--ion-color-primary-shade);
       width: 90%;
     }
-  }
-  ion-button {
-    text-align: center;
-    align-items: center;
+    .buttons {
+      width: 90%;
+      text-align: center;
+      align-items: center;
+    }
   }
 }

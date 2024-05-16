@@ -14,4 +14,6 @@ export interface Song {
   end: string;
 
   label: string;
+
+  section?: string;
 }

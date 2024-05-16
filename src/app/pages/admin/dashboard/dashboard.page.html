@@ -1,20 +1,51 @@
 <ion-content>
   <div class="contenido">
-    <h1>Lista de todas las canciones:</h1>
-    <br />
-    <ion-searchbar
-      show-cancel-button="focus"
-      placeholder="Buscar cancion"
-      [(ngModel)]="searchTerm"
-      (ionInput)="filterSongs()"
-    ></ion-searchbar>
+    <ion-grid>
+      <ion-row>
+        <ion-col size="4">
+          <h1>Lista de canciones:</h1>
+        </ion-col>
+        <ion-col size="4">
+          <ion-searchbar
+            show-cancel-button="focus"
+            placeholder="Buscar canción"
+            [(ngModel)]="searchTerm"
+            (ionInput)="filterSongs()"
+          ></ion-searchbar>
+        </ion-col>
+        <ion-col size="4">
+          <div class="buttons">
+            <ion-button
+              (click)="openAddSongModal()"
+              color="success"
+              shape="round"
+            >
+              <ion-icon slot="icon-only" name="add"></ion-icon>
+            </ion-button>
+            <ion-button
+              (click)="toggleConfirmationButtons()"
+              color="danger"
+              shape="round"
+            >
+              <ion-icon slot="icon-only" name="trash"></ion-icon>
+            </ion-button>
+            <ion-button (click)="showLists()" color="primary" shape="round">
+              <ion-icon slot="icon-only" name="list"></ion-icon>
+            </ion-button>
+          </div>
+        </ion-col>
+      </ion-row>
+    </ion-grid>
 
-    <div *ngIf="showConfirmationButtons">
-      <ion-button (click)="presentDeleteConfirm()"> Confirmar </ion-button>
-      <ion-button (click)="cancelSelectedSongs()"> Volver </ion-button>
+    <div *ngIf="showConfirmationButtons" class="optionsDelete">
+      <ion-button (click)="presentDeleteConfirm()" color="danger">
+        Eliminar
+      </ion-button>
+      <ion-button (click)="cancelSelectedSongs()" color="warning">
+        Cancelar
+      </ion-button>
     </div>
 
-    <br /><br />
     <ion-list *ngFor="let song of filteredSongs">
       <ion-item>
         <ion-label (click)="openSongPage(song.id)">
@@ -26,22 +57,5 @@
         ></ion-checkbox>
       </ion-item>
     </ion-list>
-
-    <ion-fab slot="fixed" vertical="bottom" horizontal="end">
-      <ion-fab-button color="secondary">
-        <ion-icon name="chevron-up-circle"></ion-icon>
-      </ion-fab-button>
-      <ion-fab-list side="top">
-        <ion-fab-button color="danger" (click)="toggleConfirmationButtons()">
-          <ion-icon name="trash"></ion-icon>
-        </ion-fab-button>
-        <ion-fab-button (click)="openAddSongModal()" color="success">
-          <ion-icon name="add"></ion-icon>
-        </ion-fab-button>
-        <ion-fab-button (click)="showLists()" color="primary">
-          <ion-icon name="list"></ion-icon>
-        </ion-fab-button>
-      </ion-fab-list>
-    </ion-fab>
   </div>
 </ion-content>
