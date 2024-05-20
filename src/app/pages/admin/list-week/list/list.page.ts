@@ -5,7 +5,7 @@ import { List } from 'src/app/interfaces/list';
 import { Song } from 'src/app/interfaces/song';
 import { ListSong } from 'src/app/interfaces/list-song';
 import { NavController } from '@ionic/angular';
-import { forkJoin, of, catchError, Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { Location } from '@angular/common';
 import { switchMap, debounceTime } from 'rxjs/operators';
 
