@@ -4,7 +4,6 @@ import { ListSong } from './list-song';
 export interface List {
   id?: string;
   name: string;
-  description?: string;
   songs: ListSong[];
   createdAt?: Date;
   selected?: boolean;

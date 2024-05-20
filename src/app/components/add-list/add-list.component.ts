@@ -14,7 +14,6 @@ export class AddListComponent implements OnInit {
   constructor(private router: Router, private firestore: FirestoreService) {
     this.formAddList = new FormGroup({
       name: new FormControl('', Validators.required),
-      description: new FormControl(''),
       songIds: new FormControl([]), // Inicializa como array vacío, los IDs de canciones se añadirán después
       createdAt: new FormControl(new Date()), // Fecha actual, no necesitas un input para esto
       selected: new FormControl(false), // Valor predeterminado false, no es manejado por formulario
