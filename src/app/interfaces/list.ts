@@ -1,8 +1,11 @@
+import { ListSong } from './list-song';
+
+// En list.ts
 export interface List {
   id?: string;
   name: string;
   description?: string;
-  songIds: string[];
+  songs: ListSong[];
   createdAt?: Date;
-  selected?: boolean; // Agrega esta línea para manejar la selección de checkbox
+  selected?: boolean;
 }

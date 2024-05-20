@@ -155,16 +155,17 @@ export class ListWeekPage implements OnInit {
       .getListById(listId)
       .pipe(first())
       .subscribe(async (list) => {
-        if (!list.songIds) list.songIds = [];
-        const songsToAdd = this.selectedSongs.filter(
-          (id) => !list.songIds.includes(id)
-        );
+        if (!list.songs) list.songs = [];
+
+        const songsToAdd = this.selectedSongs
+          .filter((id) => !list.songs.some((song) => song.songId === id))
+          .map((id) => ({ songId: id, section: 'Todas las Canciones' }));
+
         if (songsToAdd.length > 0) {
-          const updatedSongIds = Array.from(
-            new Set([...list.songIds, ...songsToAdd])
-          ); // Elimina duplicados
+          const updatedSongs = [...list.songs, ...songsToAdd];
+
           this.firestore
-            .updateSongsInList(listId, updatedSongIds)
+            .updateSongsInList(listId, updatedSongs)
             .then(async () => {
               console.log('Canciones añadidas con éxito');
               await this.presentToast(songsToAdd.length);

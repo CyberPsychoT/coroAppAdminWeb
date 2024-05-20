@@ -12,6 +12,7 @@ import {
 import { Observable } from 'rxjs';
 import { Song } from '../interfaces/song';
 import { List } from '../interfaces/list';
+import { ListSong } from '../interfaces/list-song';
 import { Subject } from 'rxjs';
 
 @Injectable({
@@ -75,7 +76,7 @@ export class FirestoreService {
       });
   }
 
-  //Trae todas las canciones para agregarla al dashboard
+  //Trae todas las listas
   getLists(): Observable<List[]> {
     const listRef = collection(this.firestore, 'lists');
     return collectionData(listRef, { idField: 'id' }) as Observable<List[]>;
@@ -97,8 +98,9 @@ export class FirestoreService {
     return updateDoc(listDocRef, listData);
   }
   //Actualizacion de lista con ids de songs
-  updateSongsInList(listId: string, songIds: string[]): Promise<void> {
+  updateSongsInList(listId: string, songs: ListSong[]): Promise<void> {
     const listDocRef = doc(this.firestore, `lists/${listId}`);
-    return updateDoc(listDocRef, { songIds });
+    console.log('Updating list with songs and sections:', songs);
+    return updateDoc(listDocRef, { songs }); // Asegúrate de que 'songs' es la clave correcta en Firestore.
   }
 }

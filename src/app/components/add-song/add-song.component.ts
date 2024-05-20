@@ -26,8 +26,12 @@ export class AddSongComponent implements OnInit {
   ngOnInit() {}
 
   async onSubmit() {
-    console.log(this.formAddSong.value);
-    const response = await this.firestore.addSong(this.formAddSong.value);
+    const songData = {
+      ...this.formAddSong.value,
+    };
+
+    console.log(songData);
+    const response = await this.firestore.addSong(songData);
     if (response) {
       console.log('Song added with ID:', response.id);
       this.router.navigate(['admin/dashboard']); // Decide where to navigate after submission

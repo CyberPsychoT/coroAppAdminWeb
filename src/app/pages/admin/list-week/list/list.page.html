@@ -25,7 +25,7 @@
           <ion-label>{{ song.name }}</ion-label>
           <ion-select
             [(ngModel)]="songSections[song.id]"
-            (ionChange)="assignSongToSection(song, $event.detail.value)"
+            (ionChange)="assignSongToSection(song.id, $event.detail.value)"
           >
             <ion-select-option *ngFor="let sec of sections" [value]="sec.name"
               >{{ sec.name }}</ion-select-option
