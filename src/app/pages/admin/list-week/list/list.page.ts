@@ -72,14 +72,14 @@ export class ListPage implements OnInit, OnDestroy {
       { name: 'Gloria', songs: [], open: true },
       { name: 'Salmo', songs: [], open: true },
       { name: 'Antes del Evangelio', songs: [], open: true },
-      { name: 'Despues del Evangelio', songs: [], open: true },
+      { name: 'Después del Evangelio', songs: [], open: true },
       { name: 'Ofertorio', songs: [], open: true },
       { name: 'Santo', songs: [], open: true },
       { name: 'Prefacio', songs: [], open: true },
       { name: 'Padre Nuestro', songs: [], open: true },
       { name: 'Canto de paz', songs: [], open: true },
       { name: 'Cordero', songs: [], open: true },
-      { name: 'Comunion', songs: [], open: true },
+      { name: 'Comunión', songs: [], open: true },
       { name: 'Canto Final', songs: [], open: true },
     ];
   }
