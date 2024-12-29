@@ -28,7 +28,7 @@ export class ListPage implements OnInit, OnDestroy {
     private location: Location,
     private router: Router,
     private firestoreService: FirestoreService
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.routeSub = this.activatedRoute.params
@@ -166,5 +166,26 @@ export class ListPage implements OnInit, OnDestroy {
     if (songId) {
       this.navCtrl.navigateForward(`admin/dashboard/song/${songId}`);
     }
+  }
+
+  // Nueva función para eliminar una canción de la lista
+  removeSongFromList(songId: string) {
+    if (this.list && this.list.id) {
+      // Filtra la canción de la lista
+      this.list.songs = this.list.songs.filter(ls => ls.songId !== songId);
+
+      // Actualiza la lista en Firestore
+      this.firestoreService.updateList(this.list.id, {
+        songs: this.list.songs,
+      });
+
+      // Reorganiza las canciones en la UI
+      this.reorganizeSongs();
+    }
+  }
+
+  // Modifica la función hideSong para que use removeSongFromList
+  hideSong(songId: string) {
+    this.removeSongFromList(songId);
   }
 }
