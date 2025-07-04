@@ -1,31 +1,236 @@
-ion-content {
-  .list-visualizer {
-    width: 390px;
-    // border: 1px solid;
-    border-color: var(--ion-color-medium);
-    margin: 20px 40px;
-    ion-item {
-      font-size: 20px;
-    }
-    p {
-      margin: 5px 15px;
-    }
-  }
-  .contenido {
-    margin: 20px;
+/* Fuentes y Variables */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Roboto+Mono:wght@400;500&display=swap');
 
-    .name-song {
-      color: var(--ion-color-medium);
-    }
-    .accordion {
-      border: 2px solid;
-      border-color: var(--ion-color-primary-shade);
-      width: 90%;
-    }
-    .buttons {
-      width: 90%;
-      text-align: center;
-      align-items: center;
+:host {
+  --page-bg: #f4f5f7;
+  --card-bg: #ffffff;
+  --card-border: #e9ecef;
+  --text-primary: #212529;
+  --text-secondary: #6c757d;
+  --section-header-bg: transparent;
+  --lyrics-font-size: 1rem;
+  --focus-glow: 0 0 0 3px rgba(52, 152, 219, 0.2); // NUEVO: Brillo para el foco
+
+  // NUEVO: Variables para consistencia en las transiciones
+  --transition-speed: 0.35s;
+  --transition-ease: cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.page-container {
+  font-family: 'Roboto', sans-serif;
+  background-color: var(--page-bg);
+  height: 100%;
+}
+
+/* Encabezado */
+.page-header {
+  padding: 8px 24px;
+  background: var(--page-bg);
+  position: sticky;
+  top: 0;
+  z-index: 20;
+
+  .back-button {
+    color: var(--text-secondary);
+    font-weight: 500;
+    text-transform: none;
+    --ripple-color: transparent;
+    transition: color var(--transition-speed) ease; // NUEVO: Transición suave para el color
+    &:hover {
+      color: var(--text-primary);
     }
   }
+}
+
+/* Grid Layout */
+.content-grid {
+  display: grid;
+  grid-template-columns: 2.5fr 1fr;
+  gap: 24px;
+  padding: 0 24px 24px;
+  background-color: var(--page-bg);
+}
+
+/* Columna Principal (Izquierda) */
+.main-content {
+  .section-card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    margin-bottom: 12px;
+    overflow: hidden;
+    // MEJORADO: Transición más específica y efecto hover
+    transition: transform var(--transition-speed) var(--transition-ease),
+                box-shadow var(--transition-speed) var(--transition-ease);
+    animation: fadeIn 0.6s ease-out forwards;
+
+    &:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+    }
+
+    .section-header {
+      --background: var(--section-header-bg);
+      --min-height: 50px;
+      cursor: pointer;
+      font-weight: 500;
+      color: var(--text-primary);
+      .section-name { font-size: 1.1rem; }
+      .toggle-icon {
+        font-size: 20px;
+        color: var(--text-secondary);
+        // MEJORADO: Transición más suave
+        transition: transform var(--transition-speed) var(--transition-ease);
+      }
+    }
+    &.open .toggle-icon { transform: rotate(180deg); }
+
+    .section-content {
+      max-height: 0;
+      overflow: hidden;
+      // MEJORADO: Se añade 'opacity' para un efecto de desvanecimiento suave
+      transition: max-height 0.4s ease-in-out, opacity 0.4s ease-in-out;
+      padding: 0 20px;
+      opacity: 0; // Oculto por defecto
+
+      .lyrics-content {
+        white-space: pre-wrap;
+        line-height: 1.7;
+        font-size: var(--lyrics-font-size);
+        color: var(--text-primary);
+        padding: 8px 0 16px;
+      }
+      .editable-textarea {
+        --padding-start: 0;
+        --inner-padding-end: 0;
+        ion-textarea {
+          line-height: 1.7;
+          font-size: var(--lyrics-font-size);
+          background: #f8f9fa;
+          border-radius: 8px;
+          padding: 12px;
+          border: 2px solid transparent;
+          // NUEVO: Transición para el borde y sombra al enfocar
+          transition: border-color var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
+          &:focus {
+            border-color: var(--menu-item-active-background);
+            box-shadow: var(--focus-glow);
+          }
+        }
+      }
+    }
+    &.open .section-content {
+      max-height: 2000px;
+      opacity: 1; // El contenido se vuelve visible
+    }
+  }
+}
+
+/* Barra Lateral (Derecha) */
+.sidebar-content {
+  .sidebar-sticky-content {
+    position: sticky;
+    top: 80px;
+  }
+  .info-card, .actions-card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 24px;
+    animation: fadeInSide 0.6s ease-out 0.2s forwards; // Animación mejorada
+    opacity: 0;
+    // NUEVO: Transición para el hover
+    transition: transform var(--transition-speed) var(--transition-ease),
+                box-shadow var(--transition-speed) var(--transition-ease);
+    &:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
+    }
+  }
+
+  .song-title {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0 0 16px 0;
+    line-height: 1.2;
+  }
+  .label-title {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .song-label {
+    font-size: 1rem;
+    font-weight: 500;
+    --background: var(--menu-item-active-background);
+    --color: #fff;
+  }
+  .actions-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0 0 16px 0;
+  }
+  .editable-field {
+    --background: #f8f9fa;
+    border-radius: 8px;
+    margin-bottom: 16px;
+    border: 2px solid transparent;
+    // NUEVO: Transición para el foco
+    transition: border-color var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
+    &:focus-within {
+      border-color: var(--menu-item-active-background);
+      box-shadow: var(--focus-glow);
+    }
+  }
+  ion-button {
+    --border-radius: 8px;
+    text-transform: none;
+    font-weight: 600;
+    // NUEVO: Transición para botones más dinámicos
+    transition: transform var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+    &:active {
+      transform: translateY(0);
+    }
+  }
+  .edit-btn {
+    --background: var(--menu-item-active-background);
+    --color: #fff;
+  }
+}
+
+/* Diseño Responsivo */
+@media (max-width: 992px) {
+  .content-grid {
+    grid-template-columns: 1fr;
+  }
+  .sidebar-content .sidebar-sticky-content {
+    position: static;
+  }
+}
+
+/* Animaciones */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+// NUEVO: Animación de entrada para los elementos laterales
+@keyframes fadeInSide {
+  from { opacity: 0; transform: translateX(20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+// NUEVO: Animación para los elementos que aparecen en modo edición
+.editable-field, .save-btn, .cancel-btn {
+  animation: fadeIn 0.5s var(--transition-ease) forwards;
 }

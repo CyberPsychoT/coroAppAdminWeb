@@ -1,36 +1,68 @@
+<!--
+  * login.page.html
+  * Versión rediseñada basada en la imagen de referencia.
+  * Estructura de dos paneles: uno visual a la izquierda y el formulario a la derecha.
+-->
 <ion-content [fullscreen]="true">
-  <div class="contenido">
-    <div class="interior">
-      <div class="bienvenido">
-        <ion-title>Administrador!</ion-title>
-        <p>Ingresa con tu cuenta de administrador</p>
+  <!-- Contenedor principal que aloja los dos paneles -->
+  <div class="login-container">
+
+    <!-- Panel Izquierdo (Visual) -->
+    <div class="left-panel">
+      <div class="showcase-card">
+        <ion-icon name="musical-notes-outline"></ion-icon>
+        <h2>Portal del Coro</h2>
+        <p>Tu música, tu voz, tu pasión.</p>
       </div>
+    </div>
 
-      <form [formGroup]="formLogin" (ngSubmit)="onSubmit()">
-        <div class="ion-padding">
-          <ion-item>
+    <!-- Panel Derecho (Formulario de Login) -->
+    <div class="right-panel">
+      <div class="login-form-container">
+        
+        <!-- Encabezado del formulario -->
+        <div class="form-header">
+          <h1>Bienvenido de Nuevo</h1>
+          <p>Ingresa tus credenciales para acceder.</p>
+        </div>
+
+        <!-- Formulario con validación -->
+        <form [formGroup]="formLogin" (ngSubmit)="onSubmit()" class="ion-padding">
+          
+          <!-- Campo de Correo Electrónico -->
+          <ion-item class="input-item" lines="none">
+            <ion-label position="floating">Correo Electrónico</ion-label>
             <ion-input
-              type="text"
+              type="email"
               formControlName="email"
-              placeholder="Correo electrónico"
+              placeholder="tu@correo.com"
+              required
             ></ion-input>
+          </ion-item>
 
-            <ion-icon name="person-outline"></ion-icon> </ion-item
-          ><br /><br />
-          <ion-item>
+          <!-- Campo de Contraseña -->
+          <ion-item class="input-item" lines="none">
+            <ion-label position="floating">Contraseña</ion-label>
             <ion-input
               type="password"
               formControlName="password"
-              placeholder="Contraseña"
+              placeholder="••••••••"
+              required
             ></ion-input>
-
-            <ion-icon name="lock-closed-outline"></ion-icon>
           </ion-item>
-        </div>
-        <div class="button">
-          <ion-button color="secondary" type="submit">Enviar</ion-button>
-        </div>
-      </form>
+
+          <!-- Botón de Envío -->
+          <ion-button 
+            class="login-button" 
+            type="submit" 
+            expand="block" 
+            [disabled]="formLogin.invalid">
+            Ingresar
+          </ion-button>
+
+        </form>
+      </div>
     </div>
+
   </div>
 </ion-content>

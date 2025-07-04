@@ -15,11 +15,11 @@ export class AddSongComponent implements OnInit {
     this.formAddSong = new FormGroup({
       name: new FormControl('', Validators.required), // Asegúrate de que el nombre no esté vacío
       introduction: new FormControl(''), // Asegúrate de que la descripción no esté vacía
-      letter1: new FormControl('', Validators.required), // Asegúrate de que la descripción no esté vacía
+      letter1: new FormControl(''), // Asegúrate de que la descripción no esté vacía
       interlude: new FormControl(''), // Asegúrate de que la descripción no esté vacía
       letter2: new FormControl(''), // Asegúrate de que la descripción no esté vacía
       end: new FormControl(''), // Asegúrate de que la descripción no esté vacía
-      label: new FormControl('', Validators.required), // Asegúrate de que la descripción no esté vacía
+      label: new FormControl(''), // Asegúrate de que la descripción no esté vacía
     });
   }
 

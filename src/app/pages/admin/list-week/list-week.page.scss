@@ -1,32 +1,260 @@
-.contenido {
-  margin: 20px 50px;
+/* Fuentes y Variables */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
 
-  .buttons {
+:host {
+  --page-bg: #f0f2f5;
+  --header-bg: #ffffff;
+  --card-bg: #ffffff;
+  --card-border: #e0e0e0;
+  --text-primary: #1c1e21;
+  --text-secondary: #606770;
+  --searchbar-bg: #f0f2f5;
+  --button-add-bg: #34c759;
+  --button-delete-bg: #ff3b30;
+  --checkbox-checked-bg: var(--menu-item-active-background);
+  --card-selected-bg: #e7f3ff;
+  --card-selected-border: var(--menu-item-active-background);
+}
+
+.dashboard-container {
+  font-family: 'Roboto', sans-serif;
+  background-color: var(--page-bg);
+  height: 100%;
+}
+
+/* Encabezado */
+.dashboard-header {
+  background: var(--header-bg);
+  border-radius: 0 0 30px 30px;
+  padding: 12px 32px;
+  border-bottom: 1px solid var(--card-border);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+
+  .page-title {
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    margin: 0 0 16px 0;
+  }
+
+  .actions-toolbar {
     display: flex;
-    justify-content: flex-end; /* Alinea los botones hacia la derecha */
-    ion-button {
-      margin: 0 20px; /* Ajusta el espacio entre los botones si es necesario */
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+  }
+}
+
+/* Barra de Búsqueda Personalizada */
+.custom-searchbar {
+  --background: var(--searchbar-bg);
+  --border-radius: 20px;
+  --box-shadow: none;
+  --placeholder-color: var(--text-secondary);
+  --icon-color: var(--text-secondary);
+  flex-grow: 1;
+  max-width: 500px;
+}
+
+/* Botones de Acción */
+.action-buttons {
+  display: flex;
+  gap: 12px;
+
+  .control-button {
+    --border-radius: 50%;
+    width: 44px;
+    height: 44px;
+    font-size: 10px;
+    color: white;
+    --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
+
+    &.add-btn {
+      --background: var(--button-add-bg);
+    }
+
+    &.delete-btn {
+      --background: var(--button-delete-bg);
+    }
+
+    &:hover {
+      transform: translateY(-3px);
+      --box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+    }
+  }
+}
+
+/* Contenedor de Confirmación */
+.confirmation-container {
+  background-color: #fffbe6;
+  border: 1px solid #ffe58f;
+  border-radius: 8px;
+  padding: 16px;
+  margin: 16px 32px 0;
+  text-align: center;
+  animation: fadeIn 0.5s ease-out;
+
+  p {
+    margin: 0 0 12px 0;
+    color: #5e4d03;
+    font-weight: 500;
+  }
+
+  .confirmation-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+  }
+
+  &.info-banner {
+    background-color: #e7f3ff;
+    border-color: #8ec2f2;
+
+    p {
+      color: #004085;
+      margin: 0;
+    }
+  }
+}
+
+/* Lista de Items (Canciones/Listas) */
+.item-list-container {
+  padding: 16px 32px;
+}
+
+.item-list {
+  background: transparent;
+  padding: 0;
+}
+
+.list-item {
+  --padding-start: 0;
+  --inner-padding-end: 0;
+  --background: transparent;
+  --border-width: 0;
+  padding-bottom: 12px;
+  animation: slideInUp 0.4s ease-out forwards;
+  opacity: 0;
+
+  @for $i from 1 through 50 {
+    &:nth-child(#{$i}) {
+      animation-delay: #{$i * 0.03}s;
+    }
+  }
+}
+
+.item-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 12px;
+  padding: 10px 14px;
+  transition: all 0.3s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+
+  .item-info {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    cursor: pointer;
+    flex-grow: 1;
+  }
+
+  .item-icon {
+    font-size: 28px;
+    color: var(--menu-item-active-background);
+  }
+
+  .item-name {
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: var(--text-primary);
+  }
+
+  .item-actions {
+    .add-to-list-btn {
+      --padding-start: 8px;
+      --padding-end: 8px;
+      font-size: 28px;
+      color: var(--menu-item-active-background);
+      transition: transform 0.2s ease;
+
+      &:hover {
+        transform: scale(1.15);
+      }
+    }
+
+    ion-checkbox {
+      --size: 22px;
+      --border-radius: 6px;
+      --border-color: var(--card-border);
+      --border-color-checked: var(--checkbox-checked-bg);
+      --background-checked: var(--checkbox-checked-bg);
+      --checkmark-color: #ffffff;
     }
   }
 
-  ion-col {
-    display: flex;
-    align-items: center; /* Centra verticalmente el contenido dentro de las columnas */
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    border-color: var(--card-selected-border);
   }
 
-  ion-col:first-child {
-    justify-content: flex-start; /* Alinea el título a la izquierda */
+  &.selected {
+    background: var(--card-selected-bg);
+    border-color: var(--card-selected-border);
+  }
+}
+
+/* Estado Vacío */
+.empty-state {
+  text-align: center;
+  padding: 80px 20px;
+  color: var(--text-secondary);
+
+  ion-icon {
+    font-size: 64px;
+    margin-bottom: 16px;
   }
 
-  ion-col:nth-child(2) {
-    justify-content: center; /* Centra la barra de búsqueda */
+  p {
+    font-size: 1.2rem;
+    font-weight: 500;
   }
 
-  ion-col:last-child {
-    justify-content: flex-end; /* Alinea los botones hacia la derecha */
+  span {
+    font-size: 1rem;
+  }
+}
+
+/* Animaciones */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
   }
 
-  .optionsDelete {
-    text-align: center;
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }

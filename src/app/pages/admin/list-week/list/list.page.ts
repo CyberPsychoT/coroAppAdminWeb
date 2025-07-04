@@ -1,13 +1,13 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { FirestoreService } from 'src/app/services/firestore.service';
 import { List } from 'src/app/interfaces/list';
 import { Song } from 'src/app/interfaces/song';
 import { ListSong } from 'src/app/interfaces/list-song';
 import { NavController } from '@ionic/angular';
 import { Subscription } from 'rxjs';
+import { switchMap, debounceTime, map, tap } from 'rxjs/operators';
 import { Location } from '@angular/common';
-import { switchMap, debounceTime } from 'rxjs/operators';
 
 @Component({
   selector: 'app-list',
@@ -16,146 +16,107 @@ import { switchMap, debounceTime } from 'rxjs/operators';
 })
 export class ListPage implements OnInit, OnDestroy {
   list: List | undefined;
-  songs: Song[] = [];
   private routeSub!: Subscription;
   sections: any[] = [];
-
-  songSections: { [key: string]: string } = {}; // Mapea songId a sectionName
 
   constructor(
     private activatedRoute: ActivatedRoute,
     private navCtrl: NavController,
     private location: Location,
-    private router: Router,
     private firestoreService: FirestoreService
   ) { }
 
   ngOnInit() {
     this.routeSub = this.activatedRoute.params
       .pipe(
-        debounceTime(300), // Añade un pequeño retraso para evitar múltiples cargas rápidas
-        switchMap((params) => {
-          const listId = params['id'];
-          return this.firestoreService.getListById(listId);
+        map(params => params['id']),
+        switchMap(listId => this.firestoreService.getListById(listId)),
+        tap(list => {
+          this.list = list;
+          this.initializeAndLoadSongs(list.songs || []);
         })
       )
-      .subscribe((list) => {
-        this.list = list;
-        this.initializeSections(); // Reinicia las secciones para asegurar que están limpias
-        if (list.songs && list.songs.length > 0) {
-          this.loadSongs(list.songs); // Carga canciones según el nuevo modelo
-        }
-      });
+      .subscribe();
   }
 
   ngOnDestroy() {
-    if (this.routeSub !== null) {
+    if (this.routeSub) {
       this.routeSub.unsubscribe();
     }
   }
 
-  loadListAndSongs(listId: string) {
-    this.firestoreService.getListById(listId).subscribe((list) => {
-      this.list = list;
-      this.initializeSections();
-      if (list.songs && list.songs.length > 0) {
-        this.loadSongs(list.songs);
-      }
+  initializeAndLoadSongs(listSongs: ListSong[]) {
+    this.initializeSections();
+    listSongs.forEach(listSong => {
+      this.firestoreService.getSongById(listSong.songId).subscribe((song: Song) => {
+        if (song) {
+          const section = this.sections.find(sec => sec.name === listSong.section);
+          if (section) {
+            section.songs.push({ ...song, section: listSong.section });
+          }
+        }
+      });
     });
   }
 
   initializeSections() {
     this.sections = [
       { name: 'Todas las Canciones', songs: [], open: true },
-      { name: 'Entrada', songs: [], open: true },
-      { name: 'Canto de Perdón', songs: [], open: true },
-      { name: 'Gloria', songs: [], open: true },
-      { name: 'Salmo', songs: [], open: true },
-      { name: 'Antes del Evangelio', songs: [], open: true },
-      { name: 'Después del Evangelio', songs: [], open: true },
-      { name: 'Ofertorio', songs: [], open: true },
-      { name: 'Santo', songs: [], open: true },
-      { name: 'Prefacio', songs: [], open: true },
-      { name: 'Padre Nuestro', songs: [], open: true },
-      { name: 'Canto de paz', songs: [], open: true },
-      { name: 'Cordero', songs: [], open: true },
-      { name: 'Comunión', songs: [], open: true },
-      { name: 'Canto Final', songs: [], open: true },
+      { name: 'Entrada', songs: [], open: false },
+      { name: 'Canto de Perdón', songs: [], open: false },
+      { name: 'Gloria', songs: [], open: false },
+      { name: 'Salmo', songs: [], open: false },
+      { name: 'Antes del Evangelio', songs: [], open: false },
+      { name: 'Después del Evangelio', songs: [], open: false },
+      { name: 'Ofertorio', songs: [], open: false },
+      { name: 'Santo', songs: [], open: false },
+      { name: 'Prefacio', songs: [], open: false },
+      { name: 'Padre Nuestro', songs: [], open: false },
+      { name: 'Canto de paz', songs: [], open: false },
+      { name: 'Cordero', songs: [], open: false },
+      { name: 'Comunión', songs: [], open: false },
+      { name: 'Canto Final', songs: [], open: false },
     ];
   }
 
-  loadSongs(listSongs: ListSong[]) {
-    // Limpiar canciones existentes antes de cargar nuevas para evitar duplicados
-    this.sections.forEach((section) => (section.songs = []));
+  assignSongToSection(songId: string, newSectionName: string) {
+    if (!this.list || !this.list.id) return;
 
-    listSongs.forEach((listSong) => {
-      // Verifica que la canción no haya sido ya cargada
-      if (
-        !this.sections.some((section) =>
-          section.songs.some((song: Song) => song.id === listSong.songId)
-        )
-      ) {
-        this.firestoreService
-          .getSongById(listSong.songId)
-          .subscribe((song: Song) => {
-            if (song) {
-              const sectionIndex = this.sections.findIndex(
-                (sec) => sec.name === listSong.section
-              );
-              if (sectionIndex !== -1) {
-                // Solo añadir si la canción no está ya en la sección
-                if (
-                  !this.sections[sectionIndex].songs.some(
-                    (s: Song) => s.id === song.id
-                  )
-                ) {
-                  this.sections[sectionIndex].songs.push({
-                    ...song,
-                    section: listSong.section,
-                  });
-                }
-              }
-            }
-          });
+    // Actualiza la UI primero para una respuesta instantánea
+    let songToMove: any;
+    this.sections.forEach(oldSection => {
+      const songIndex = oldSection.songs.findIndex((s: Song) => s.id === songId);
+      if (songIndex > -1) {
+        songToMove = oldSection.songs.splice(songIndex, 1)[0];
       }
     });
-  }
 
-  assignSongToSection(songId: string, sectionName: string) {
-    if (this.list && this.list.id) {
-      const listSongIndex = this.list.songs.findIndex(
-        (ls) => ls.songId === songId
-      );
-      if (listSongIndex !== -1) {
-        this.list.songs[listSongIndex].section = sectionName;
-      } else {
-        this.list.songs.push({ songId, section: sectionName });
+    if (songToMove) {
+      songToMove.section = newSectionName;
+      const newSection = this.sections.find(sec => sec.name === newSectionName);
+      if (newSection) {
+        newSection.songs.push(songToMove);
       }
-      this.firestoreService.updateList(this.list.id, {
-        songs: this.list.songs,
-      });
-      this.reorganizeSongs();
+    }
+
+    // Actualiza Firestore en segundo plano
+    const listSongIndex = this.list.songs.findIndex(ls => ls.songId === songId);
+    if (listSongIndex > -1) {
+      this.list.songs[listSongIndex].section = newSectionName;
+      this.firestoreService.updateList(this.list.id, { songs: this.list.songs });
     }
   }
 
-  reorganizeSongs() {
-    console.log('Reorganizando canciones:', this.songs);
-    this.sections.forEach((section) => (section.songs = [])); // Limpia todas las secciones primero
-
-    this.songs.forEach((song) => {
-      const section = this.sections.find((sec) => sec.name === song.section);
-      if (section) {
-        section.songs.push(song);
-      } else {
-        console.log(
-          'Sección no encontrada para la canción:',
-          song.name,
-          song.section
-        );
-      }
-    });
-
-    console.log('Secciones después de reorganizar:', this.sections);
+  hideSong(songId: string) {
+    if (this.list && this.list.id) {
+      // Elimina de la UI
+      this.sections.forEach(section => {
+        section.songs = section.songs.filter((s: Song) => s.id !== songId);
+      });
+      // Elimina de la lista local y actualiza Firestore
+      this.list.songs = this.list.songs.filter(ls => ls.songId !== songId);
+      this.firestoreService.updateList(this.list.id, { songs: this.list.songs });
+    }
   }
 
   toggleSection(section: any) {
@@ -168,24 +129,16 @@ export class ListPage implements OnInit, OnDestroy {
     }
   }
 
-  // Nueva función para eliminar una canción de la lista
-  removeSongFromList(songId: string) {
-    if (this.list && this.list.id) {
-      // Filtra la canción de la lista
-      this.list.songs = this.list.songs.filter(ls => ls.songId !== songId);
-
-      // Actualiza la lista en Firestore
-      this.firestoreService.updateList(this.list.id, {
-        songs: this.list.songs,
-      });
-
-      // Reorganiza las canciones en la UI
-      this.reorganizeSongs();
-    }
+  goBack() {
+    this.location.back();
   }
 
-  // Modifica la función hideSong para que use removeSongFromList
-  hideSong(songId: string) {
-    this.removeSongFromList(songId);
+  trackBySectionName(index: number, section: any): string {
+    return section.name;
   }
+
+  trackBySongId(index: number, song: Song): string {
+    return song.id ?? '';
+  }
+
 }

@@ -25,7 +25,8 @@ export class ListWeekPage implements OnInit {
     private toastController: ToastController,
     private firestore: FirestoreService,
     private activatedRoute: ActivatedRoute
-  ) {}
+  ) { }
+
   ngOnInit() {
     this.activatedRoute.queryParams.subscribe((params) => {
       if (params['selectedSongs']) {
@@ -38,12 +39,29 @@ export class ListWeekPage implements OnInit {
       this.filteredLists = this.lists;
     });
   }
-  //Filtrar canciones
+
+  // FUNCIÓN PARA OPTIMIZAR EL *ngFor
+  trackById(index: number, list: List): string | undefined {
+    return list.id;
+  }
+
+  // Filtrar canciones
+  // Elimina acentos y convierte a minúsculas
+  normalizeText(text: string): string {
+    return text
+      .normalize('NFD')                    // separa letras y tildes (e.g. "á" => "á")
+      .replace(/[\u0300-\u036f]/g, '')    // elimina las tildes
+      .replace(/[^a-z0-9\s]/gi, '')       // elimina otros signos como comas, puntos, etc.
+      .toLowerCase();
+  }
+
   filterLists() {
-    this.filteredLists = this.searchTerm
+    const term = this.normalizeText(this.searchTerm || '');
+
+    this.filteredLists = term
       ? this.lists.filter((list) =>
-          list.name.toLowerCase().includes(this.searchTerm.toLowerCase())
-        )
+        this.normalizeText(list.name).includes(term)
+      )
       : this.lists;
   }
 

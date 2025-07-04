@@ -1,20 +1,192 @@
-.contenido {
-  background: linear-gradient(
-    to left,
-    var(--ion-color-primary),
-    var(--ion-color-dark)
-  );
+/*
+ * login.page.scss
+ * Estilos rediseñados con base en la imagen de referencia.
+ * Se implementa un diseño de dos paneles con efecto "glassmorphism".
+ * Paleta de colores cálida y animaciones suaves para una experiencia acogedora.
+*/
+
+
+// --- Animaciones ---
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideInFromRight {
+  from {
+    opacity: 0;
+    transform: translateX(50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+
+// --- Estructura Principal ---
+.login-container {
   display: flex;
-  justify-content: center; // Centra horizontalmente
-  align-items: center; // Centra verticalmente
+  height: 100%;
+  width: 100%;
+  background-color: var(--background-color);
+  animation: fadeIn 0.8s ease-in-out;
+}
+
+// --- Panel Izquierdo (Visual) ---
+.left-panel {
+  width: 45%;
+  background: url('https://images.unsplash.com/photo-1511379938547-c1f69419868d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80') no-repeat center center/cover;
+  // ** IMPORTANTE: Reemplaza la URL de arriba con tu propia imagen de fondo **
+  // Para un toque más personal, usa una imagen de tu coro o un fondo musical.
+  
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+  position: relative; // Para el overlay
+}
+
+// Overlay oscuro para mejorar la legibilidad del texto en el panel izquierdo
+.left-panel::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
+  z-index: 1;
+}
+
+.showcase-card {
+  position: relative;
+  z-index: 2;
   text-align: center;
-  height: 100vh;
-  width: 100vw;
-  .interior {
-    background-color: var(--ion-color-light);
-    padding: 50px;
-    border-radius: 10%;
-    border: 10px outset;
-    border-color: var(--ion-color-medium);
+  color: white;
+  padding: 2rem;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 20px;
+  backdrop-filter: blur(5px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+
+  ion-icon {
+    font-size: 5rem;
+    margin-bottom: 1rem;
+  }
+  h2 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin: 0;
+  }
+  p {
+    font-size: 1.2rem;
+    opacity: 0.9;
+  }
+}
+
+
+// --- Panel Derecho (Formulario) ---
+.right-panel {
+  width: 55%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.login-form-container {
+  width: 100%;
+  max-width: 450px;
+  padding: 3rem;
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 20px;
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.1);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  animation: slideInFromRight 0.7s ease-out forwards;
+}
+
+.form-header {
+  text-align: center;
+  margin-bottom: 2.5rem;
+  color: var(--text-color);
+
+  h1 {
+    font-size: 2.2rem;
+    font-weight: 700;
+    margin: 0;
+  }
+  p {
+    margin-top: 0.5rem;
+    color: var(--label-color);
+  }
+}
+
+// --- Estilos de los Inputs ---
+.input-item {
+  --background: var(--input-background);
+  --padding-start: 16px;
+  --padding-end: 16px;
+  --min-height: 55px;
+  border-radius: 10px;
+  margin-bottom: 1.2rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+
+  ion-label {
+    color: var(--label-color);
+    font-weight: 500;
+  }
+  ion-input {
+    --color: var(--text-color);
+  }
+}
+
+// --- Botón de Login ---
+.login-button {
+  --background: var(--menu-item-active-background);
+  --background-activated: var(--primary-color-hover);
+  --background-focused: var(--menu-item-active-background);
+  --box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+  --border-radius: 10px;
+  height: 50px;
+  font-weight: bold;
+  font-size: 1.1rem;
+  text-transform: none;
+  transition: all 0.3s ease-in-out;
+
+  &:not([disabled]):hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+  }
+}
+
+// --- Diseño Responsivo para Móviles ---
+@media (max-width: 992px) {
+  .left-panel {
+    display: none; // Ocultamos el panel izquierdo en pantallas pequeñas
+  }
+  .right-panel {
+    width: 100%;
+  }
+  .login-form-container {
+    width: 100%;
+    max-width: 100%;
+    height: 100%;
+    border-radius: 0;
+    box-shadow: none;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    background: transparent; // Hacemos el fondo transparente
+    backdrop-filter: none; // Quitamos el blur
+  }
+  ion-content {
+    // Para móvil, usamos la imagen de fondo en todo el contenedor
+    --background: url('https://images.unsplash.com/photo-1511379938547-c1f69419868d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1170&q=80') no-repeat center center/cover;
   }
 }

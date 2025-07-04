@@ -1,59 +1,84 @@
-<ion-content>
-  <div class="contenido">
-    <ion-grid>
-      <ion-row>
-        <ion-col size="4">
-          <h1>Lista de listas:</h1>
-        </ion-col>
-        <ion-col size="4">
-          <ion-searchbar
-            show-cancel-button="focus"
-            placeholder="Buscar canción"
-            [(ngModel)]="searchTerm"
-            (ionInput)="filterLists()"
-          ></ion-searchbar>
-        </ion-col>
-        <ion-col size="4">
-          <div class="buttons">
-            <ion-button (click)="openAddList()" color="success" shape="round">
-              <ion-icon slot="icon-only" name="add"></ion-icon>
-            </ion-button>
-            <ion-button (click)="confirmDelete()" color="danger" shape="round">
-              <ion-icon slot="icon-only" name="trash"></ion-icon>
-            </ion-button>
-          </div>
-        </ion-col>
-      </ion-row>
-    </ion-grid>
+<ion-content [fullscreen]="true">
+  <div class="dashboard-container">
+    <!-- Encabezado del Dashboard -->
+    <header class="dashboard-header">
+      <h1 class="page-title">Listas Semanales 🎹</h1>
+      <div class="actions-toolbar">
+        <ion-searchbar
+          class="custom-searchbar"
+          placeholder="Buscar por nombre de lista"
+          [(ngModel)]="searchTerm"
+          (ionInput)="filterLists()"
+          debounce="300"
+        ></ion-searchbar>
+        <div class="action-buttons">
+          <ion-button class="control-button add-btn" (click)="openAddList()">
+            <ion-icon slot="icon-only" name="add-outline"></ion-icon>
+          </ion-button>
+          <ion-button class="control-button delete-btn" (click)="confirmDelete()">
+            <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
+          </ion-button>
+        </div>
+      </div>
+    </header>
 
-    <div class="optionsDelete">
-      <ion-button *ngIf="showCheckboxes" (click)="presentDeleteConfirm()"
-        >Confirmar</ion-button
-      >
-
-      <ion-button *ngIf="showCheckboxes" (click)="cancelSelectedLists()"
-        >Volver</ion-button
-      >
+    <!-- Notificación para agregar canciones -->
+    <div class="confirmation-container info-banner" *ngIf="selectedSongs.length > 0 && !showCheckboxes">
+        <p>Has seleccionado {{ selectedSongs.length }} canci&oacute;n(es). Pulsa el bot&oacute;n '+' en una lista para a&ntilde;adirlas.</p>
     </div>
 
-    <ion-list *ngFor="let list of filteredLists">
-      <ion-item>
-        <ion-label (click)="openListPage(list.id)">
-          <ion-icon name="musical-note-outline"></ion-icon> {{ list.name }}
-        </ion-label>
-        <ion-checkbox
-          *ngIf="showCheckboxes"
-          labelPlacement="end"
-          [(ngModel)]="list.selected"
-        ></ion-checkbox>
-        <ion-button
-          shape="round"
-          *ngIf="list.id && selectedSongs.length > 0"
-          (click)="presentAddConfirm(list.id)"
-        >
-          <ion-icon slot="icon-only" name="add"></ion-icon>
-        </ion-button>
-      </ion-item>
-    </ion-list>
+    <!-- Botones de Confirmación de Eliminación -->
+    <div class="confirmation-container" *ngIf="showCheckboxes">
+        <p>Se eliminarán las listas seleccionadas. ¿Deseas continuar?</p>
+        <div class="confirmation-buttons">
+            <ion-button fill="solid" color="danger" (click)="presentDeleteConfirm()">
+                <ion-icon slot="start" name="checkmark-circle-outline"></ion-icon>
+                Confirmar
+            </ion-button>
+            <ion-button fill="outline" color="medium" (click)="cancelSelectedLists()">
+                <ion-icon slot="start" name="close-circle-outline"></ion-icon>
+                Cancelar
+            </ion-button>
+        </div>
+    </div>
+
+    <!-- Lista de Listas -->
+    <div class="item-list-container">
+      <ion-list class="item-list">
+        <ion-item *ngFor="let list of filteredLists; trackBy: trackById" class="list-item">
+          <div class="item-card" [class.selected]="list.selected">
+            <div class="item-info" (click)="openListPage(list.id)">
+              <ion-icon class="item-icon" name="list-circle-outline"></ion-icon>
+              <ion-label class="item-name">{{ list.name }}</ion-label>
+            </div>
+            <div class="item-actions">
+              <!-- Botón para agregar canciones a esta lista (si se seleccionaron canciones previamente) -->
+              <ion-button
+                *ngIf="list.id && selectedSongs.length > 0 && !showCheckboxes"
+                class="add-to-list-btn"
+                fill="clear"
+                (click)="presentAddConfirm(list.id); $event.stopPropagation()"
+              >
+                <ion-icon slot="icon-only" name="add-circle"></ion-icon>
+              </ion-button>
+              <!-- Checkbox para el modo de eliminación -->
+              <ion-checkbox
+                *ngIf="showCheckboxes"
+                mode="md"
+                [(ngModel)]="list.selected"
+                (click)="$event.stopPropagation()"
+              ></ion-checkbox>
+            </div>
+          </div>
+        </ion-item>
+      </ion-list>
+      
+      <!-- Mensaje cuando no hay listas -->
+      <div *ngIf="filteredLists.length === 0" class="empty-state">
+          <ion-icon name="sad-outline"></ion-icon>
+          <p>No se encontraron listas.</p>
+          <span>Intenta con otra búsqueda o agrega una nueva lista.</span>
+      </div>
+    </div>
   </div>
 </ion-content>

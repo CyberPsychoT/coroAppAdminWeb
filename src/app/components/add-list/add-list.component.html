@@ -1,22 +1,37 @@
-<ion-content>
-  <div class="contenido">
-    <form [formGroup]="formAddList" (ngSubmit)="onSubmit()">
-      <ion-grid>
-        <ion-row>
-          <ion-col>
-            <ion-item>
-              <ion-label position="floating">Nombre de la lista</ion-label>
-              <ion-textarea
-                formControlName="name"
-                [autoGrow]="true"
-              ></ion-textarea>
-            </ion-item>
-          </ion-col>
-        </ion-row>
-      </ion-grid>
+<ion-content [fullscreen]="true">
+  <div class="form-page-container">
+    <!-- Encabezado de la Página -->
+    <header class="page-header">
+      <ion-button fill="clear" class="back-button" (click)="goToListWeek()">
+        <ion-icon slot="icon-only" name="arrow-back-outline"></ion-icon>
+      </ion-button>
+      <h1 class="page-title">Crear Nueva Lista</h1>
+    </header>
 
-      <ion-button type="submit">Enviar</ion-button>
-      <ion-button (click)="goToListWeek()">Volver</ion-button>
-    </form>
+    <!-- Contenedor del Formulario -->
+    <div class="form-content">
+      <form [formGroup]="formAddList" (ngSubmit)="onSubmit()">
+        
+        <div class="form-section">
+          <h2 class="section-title">Nombre de la Lista</h2>
+          <ion-item class="form-field">
+            <ion-label position="floating">Nombre de la Lista (Ej: Misa Domingo 21)</ion-label>
+            <ion-input type="text" formControlName="name" required></ion-input>
+            <ion-note slot="error" *ngIf="formAddList.get('name')?.hasError('required') && formAddList.get('name')?.touched">
+              El nombre de la lista es obligatorio.
+            </ion-note>
+          </ion-item>
+        </div>
+
+        <!-- Acciones del Formulario -->
+        <div class="form-actions">
+          <ion-button class="cancel-btn" fill="outline" (click)="goToListWeek()">Cancelar</ion-button>
+          <ion-button class="submit-btn" type="submit" [disabled]="formAddList.invalid">
+            <ion-icon slot="start" name="save-outline"></ion-icon>
+            Crear Lista
+          </ion-button>
+        </div>
+      </form>
+    </div>
   </div>
 </ion-content>

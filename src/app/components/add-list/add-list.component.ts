@@ -14,25 +14,28 @@ export class AddListComponent implements OnInit {
   constructor(private router: Router, private firestore: FirestoreService) {
     this.formAddList = new FormGroup({
       name: new FormControl('', Validators.required),
-      songIds: new FormControl([]), // Inicializa como array vacío, los IDs de canciones se añadirán después
-      createdAt: new FormControl(new Date()), // Fecha actual, no necesitas un input para esto
-      selected: new FormControl(false), // Valor predeterminado false, no es manejado por formulario
+      songs: new FormControl([]), // Se cambió 'songIds' a 'songs' para coincidir con la interfaz
+      createdAt: new FormControl(new Date()),
+      selected: new FormControl(false),
     });
   }
 
   ngOnInit() {}
 
   async onSubmit() {
-    if (this.formAddList.valid) {
-      const newList = this.formAddList.value;
-      console.log(newList);
-      const response = await this.firestore.addList(newList); // Asegúrate de que existe este método
-      if (response) {
-        console.log('List added with ID:', response.id);
-        this.router.navigate(['admin/list-week']);
-      } else {
-        console.error('Failed to add List');
-      }
+    if (this.formAddList.invalid) {
+      this.formAddList.markAllAsTouched(); // Muestra errores si el formulario es inválido
+      return;
+    }
+
+    const newList = this.formAddList.value;
+    console.log(newList);
+    const response = await this.firestore.addList(newList);
+    if (response) {
+      console.log('List added with ID:', response.id);
+      this.router.navigate(['admin/list-week']);
+    } else {
+      console.error('Failed to add List');
     }
   }
 

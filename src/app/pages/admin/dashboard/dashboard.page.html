@@ -1,61 +1,72 @@
-<ion-content>
-  <div class="contenido">
-    <ion-grid>
-      <ion-row>
-        <ion-col size="4">
-          <h1>Lista de canciones:</h1>
-        </ion-col>
-        <ion-col size="4">
-          <ion-searchbar
-            show-cancel-button="focus"
-            placeholder="Buscar canción"
-            [(ngModel)]="searchTerm"
-            (ionInput)="filterSongs()"
-          ></ion-searchbar>
-        </ion-col>
-        <ion-col size="4">
-          <div class="buttons">
-            <ion-button
-              (click)="openAddSongModal()"
-              color="success"
-              shape="round"
-            >
-              <ion-icon slot="icon-only" name="add"></ion-icon>
-            </ion-button>
-            <ion-button
-              (click)="toggleConfirmationButtons()"
-              color="danger"
-              shape="round"
-            >
-              <ion-icon slot="icon-only" name="trash"></ion-icon>
-            </ion-button>
-            <ion-button (click)="showLists()" color="primary" shape="round">
-              <ion-icon slot="icon-only" name="list"></ion-icon>
-            </ion-button>
-          </div>
-        </ion-col>
-      </ion-row>
-    </ion-grid>
+<ion-content [fullscreen]="true">
+  <div class="dashboard-container">
+    <!-- Encabezado del Dashboard -->
+    <header class="dashboard-header">
+      <h1 class="page-title">Repertorio del Coro 🎼</h1>
+      <div class="actions-toolbar">
+        <ion-searchbar
+          class="custom-searchbar"
+          placeholder="Buscar por nombre"
+          [(ngModel)]="searchTerm"
+          (ionInput)="filterSongs()"
+          debounce="300"
+        ></ion-searchbar>
+        <div class="action-buttons">
+          <ion-button class="control-button add-btn" (click)="openAddSongModal()">
+            <ion-icon slot="icon-only" name="add-outline"></ion-icon>
+          </ion-button>
+          <ion-button class="control-button delete-btn" (click)="toggleConfirmationButtons()">
+            <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
+          </ion-button>
+          <ion-button class="control-button list-btn" (click)="showLists()">
+            <ion-icon slot="icon-only" name="list-outline"></ion-icon>
+          </ion-button>
+        </div>
+      </div>
+    </header>
 
-    <div *ngIf="showConfirmationButtons" class="optionsDelete">
-      <ion-button (click)="presentDeleteConfirm()" color="danger">
-        Eliminar
-      </ion-button>
-      <ion-button (click)="cancelSelectedSongs()" color="warning">
-        Cancelar
-      </ion-button>
+    <!-- Botones de Confirmación de Eliminación -->
+    <div class="confirmation-container" *ngIf="showConfirmationButtons">
+        <p>Se eliminarán las canciones seleccionadas. ¿Deseas continuar?</p>
+        <div class="confirmation-buttons">
+            <ion-button fill="solid" color="danger" (click)="presentDeleteConfirm()">
+                <ion-icon slot="start" name="checkmark-circle-outline"></ion-icon>
+                Confirmar
+            </ion-button>
+            <ion-button fill="outline" color="medium" (click)="cancelSelectedSongs()">
+                <ion-icon slot="start" name="close-circle-outline"></ion-icon>
+                Cancelar
+            </ion-button>
+        </div>
     </div>
 
-    <ion-list *ngFor="let song of filteredSongs">
-      <ion-item>
-        <ion-label (click)="openSongPage(song.id)">
-          <ion-icon name="musical-note-outline"></ion-icon> {{ song.name }}
-        </ion-label>
-        <ion-checkbox
-          labelPlacement="end"
-          [(ngModel)]="song.selected"
-        ></ion-checkbox>
-      </ion-item>
-    </ion-list>
+    <!-- Lista de Canciones -->
+    <div class="song-list-container">
+      <ion-list class="song-list">
+        <!-- Usamos trackBy para mejorar el rendimiento del ngFor -->
+        <ion-item *ngFor="let song of filteredSongs; trackBy: trackById" class="song-item">
+          <div class="song-card" [class.selected]="song.selected">
+            <div class="song-info" (click)="openSongPage(song.id)">
+              <ion-icon class="song-icon" name="musical-notes-outline"></ion-icon>
+              <ion-label class="song-name">{{ song.name }}</ion-label>
+            </div>
+            <div class="song-actions">
+                <ion-checkbox
+                    mode="md"
+                    [(ngModel)]="song.selected"
+                    (click)="$event.stopPropagation()"
+                ></ion-checkbox>
+            </div>
+          </div>
+        </ion-item>
+      </ion-list>
+      
+      <!-- Mensaje cuando no hay canciones -->
+      <div *ngIf="filteredSongs.length === 0" class="empty-state">
+          <ion-icon name="sad-outline"></ion-icon>
+          <p>No se encontraron canciones.</p>
+          <span>Intenta con otra búsqueda o agrega una nueva canción.</span>
+      </div>
+    </div>
   </div>
 </ion-content>

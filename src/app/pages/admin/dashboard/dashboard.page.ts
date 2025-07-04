@@ -47,12 +47,30 @@ export class DashboardPage implements OnInit {
     });
   }
 
-  //Filtrar canciones
+  // NUEVA FUNCIÓN PARA OPTIMIZAR EL *ngFor
+  // Esta función ayuda a Angular a identificar qué elementos de la lista han cambiado,
+  // mejorando el rendimiento al evitar que se vuelvan a renderizar todos los elementos.
+  trackById(index: number, song: any): string {
+    return song.id;
+  }
+
+  // Filtrar canciones
+  // Elimina acentos y convierte a minúsculas
+  normalizeText(text: string): string {
+    return text
+      .normalize('NFD')                    // separa letras y tildes (e.g. "á" => "á")
+      .replace(/[\u0300-\u036f]/g, '')    // elimina las tildes
+      .replace(/[^a-z0-9\s]/gi, '')       // elimina otros signos como comas, puntos, etc.
+      .toLowerCase();
+  }
+
   filterSongs() {
-    this.filteredSongs = this.searchTerm
-      ? this.songs.filter((song) =>
-          song.name.toLowerCase().includes(this.searchTerm.toLowerCase())
-        )
+    const term = this.normalizeText(this.searchTerm || '');
+
+    this.filteredSongs = term
+      ? this.songs.filter(song =>
+        this.normalizeText(song.name).includes(term)
+      )
       : this.songs;
   }
 

@@ -1,282 +1,89 @@
-<ion-header>
-  <ion-toolbar>
-    <ion-title>Categoria > {{ songForm.value.label }} </ion-title>
-  </ion-toolbar>
-</ion-header>
+<ion-content [fullscreen]="true">
+  <div class="page-container">
+    <!-- Encabezado Fijo -->
+    <header class="page-header">
+      <ion-button fill="clear" class="back-button" (click)="goBack()">
+        <ion-icon slot="icon-only" name="arrow-back-outline"></ion-icon>
+        Volver al Repertorio
+      </ion-button>
+    </header>
 
-<ion-content>
-  <ion-grid>
-    <ion-row>
-      <ion-col>
-        <ion-list lines="none" class="list-visualizer">
-          <!-- título -->
-          <ion-item color="light">
-            <ion-label
-              >Título: <span>{{ songForm.value.name }}</span></ion-label
-            >
-          </ion-item>
-          <!-- Introduccion -->
-          <ion-item
-            button
-            (click)="openSections.introduction = !openSections.introduction"
-          >
-            <ion-label>Introducción</ion-label>
-            <ion-icon
-              slot="end"
-              name="chevron-down-outline"
-              *ngIf="!openSections.introduction"
-            ></ion-icon>
-            <ion-icon
-              slot="end"
-              name="chevron-up-outline"
-              *ngIf="openSections.introduction"
-            ></ion-icon>
-          </ion-item>
-          <div *ngIf="openSections.introduction">
-            <p style="white-space: pre-wrap">
-              {{ songForm.value.introduction }}
-            </p>
-          </div>
-          <!-- Letra 1 -->
-          <ion-item
-            button
-            (click)="openSections.letter1 = !openSections.letter1"
-          >
-            <ion-label>Letra y acordes </ion-label>
-            <ion-icon
-              slot="end"
-              name="chevron-down-outline"
-              *ngIf="!openSections.letter1"
-            ></ion-icon>
-            <ion-icon
-              slot="end"
-              name="chevron-up-outline"
-              *ngIf="openSections.letter1"
-            ></ion-icon>
-          </ion-item>
-          <div *ngIf="openSections.letter1">
-            <p style="white-space: pre-wrap">{{ songForm.value.letter1 }}</p>
-          </div>
-          <!-- Interludio -->
-          <ion-item
-            button
-            (click)="openSections.interlude = !openSections.interlude"
-          >
-            <ion-label>Interludio</ion-label>
-            <ion-icon
-              slot="end"
-              name="chevron-down-outline"
-              *ngIf="!openSections.interlude"
-            ></ion-icon>
-            <ion-icon
-              slot="end"
-              name="chevron-up-outline"
-              *ngIf="openSections.interlude"
-            ></ion-icon>
-          </ion-item>
-          <div *ngIf="openSections.interlude">
-            <p style="white-space: pre-wrap">{{ songForm.value.interlude }}</p>
-          </div>
-          <!-- Letra 2 -->
-          <ion-item
-            button
-            (click)="openSections.letter2 = !openSections.letter2"
-          >
-            <ion-label>Letra y acordes</ion-label>
-            <ion-icon
-              slot="end"
-              name="chevron-down-outline"
-              *ngIf="!openSections.letter2"
-            ></ion-icon>
-            <ion-icon
-              slot="end"
-              name="chevron-up-outline"
-              *ngIf="openSections.letter2"
-            ></ion-icon>
-          </ion-item>
-          <div *ngIf="openSections.letter2">
-            <p style="white-space: pre-wrap">{{ songForm.value.letter2 }}</p>
-          </div>
-          <!-- Final -->
-          <ion-item button (click)="openSections.end = !openSections.end">
-            <ion-label>Final</ion-label>
-            <ion-icon
-              slot="end"
-              name="chevron-down-outline"
-              *ngIf="!openSections.end"
-            ></ion-icon>
-            <ion-icon
-              slot="end"
-              name="chevron-up-outline"
-              *ngIf="openSections.end"
-            ></ion-icon>
-          </ion-item>
-          <div *ngIf="openSections.end">
-            <p style="white-space: pre-wrap">{{ songForm.value.end }}</p>
-          </div>
-          <!-- Etiqueta -->
-          <ion-item button (click)="openSections.label = !openSections.label">
-            <ion-label>Etiqueta</ion-label>
-            <ion-icon
-              slot="end"
-              name="chevron-down-outline"
-              *ngIf="!openSections.label"
-            ></ion-icon>
-            <ion-icon
-              slot="end"
-              name="chevron-up-outline"
-              *ngIf="openSections.label"
-            ></ion-icon>
-          </ion-item>
-          <div *ngIf="openSections.label">
-            <p style="white-space: pre-wrap">{{ songForm.value.label }}</p>
-          </div>
-        </ion-list>
-      </ion-col>
-      <ion-col>
-        <form [formGroup]="songForm">
-          <div class="contenido">
-            <h1>
-              <ion-icon name="chevron-forward-outline"></ion-icon> Título:
-              <ng-container *ngIf="isEditing; else viewModeName">
-                <ion-input formControlName="name" type="text"></ion-input>
-              </ng-container>
-              <ng-template #viewModeName>
-                <span class="name-song">{{ songForm.get('name')?.value }}</span>
-              </ng-template>
-            </h1>
-            <ion-accordion-group multiple="true" class="accordion">
-              <!-- Acordeón para Introduccion -->
-              <ion-accordion value="introduction">
-                <ion-item slot="header" color="primary">
-                  <ion-label>Introducción</ion-label>
+    <!-- Grid de Contenido Principal -->
+    <div class="content-grid">
+      <!-- Columna Izquierda: Cuerpo de la Canción -->
+      <main class="main-content">
+        <form [formGroup]="songForm" (ngSubmit)="updateSong()">
+          <div class="song-body">
+            <ng-container *ngFor="let section of songSections; trackBy: trackByKey">
+              <!-- Solo muestra la sección si está en modo edición o si tiene contenido -->
+              <div class="section-card" [class.open]="section.open" *ngIf="isEditing || songForm.get(section.key)?.value">
+                <ion-item class="section-header" lines="none" (click)="toggleSection(section)">
+                  <ion-label class="section-name">{{ section.title }}</ion-label>
+                  <ion-icon class="toggle-icon" slot="end" [name]="section.open ? 'chevron-up-outline' : 'chevron-down-outline'"></ion-icon>
                 </ion-item>
-                <div class="ion-padding" slot="content">
-                  <ng-container *ngIf="isEditing; else viewModeintroduction">
-                    <ion-textarea
-                      formControlName="introduction"
-                      auto-grow="true"
-                    ></ion-textarea>
-                  </ng-container>
-                  <ng-template #viewModeintroduction>
-                    <p style="white-space: pre-wrap">
-                      {{ songForm.get('introduction')?.value }}
-                    </p>
+                <div class="section-content">
+                  <div *ngIf="!isEditing; else editSection" class="lyrics-content">
+                    <!-- Usamos un div en lugar de p para evitar márgenes por defecto no deseados -->
+                    <div>{{ songForm.get(section.key)?.value }}</div>
+                  </div>
+                  <ng-template #editSection>
+                    <ion-item class="editable-textarea">
+                      <ion-textarea [autoGrow]="true" [formControlName]="section.key"></ion-textarea>
+                    </ion-item>
                   </ng-template>
                 </div>
-              </ion-accordion>
-
-              <!-- Acordeón para Letra Parte 1 -->
-              <ion-accordion value="letter1">
-                <ion-item slot="header" color="secondary">
-                  <ion-label>Letra y acordes</ion-label>
-                </ion-item>
-                <div class="ion-padding" slot="content">
-                  <ng-container *ngIf="isEditing; else viewModeLetter1">
-                    <ion-textarea
-                      formControlName="letter1"
-                      auto-grow="true"
-                    ></ion-textarea>
-                  </ng-container>
-                  <!-- Letra Parte 1 -->
-                  <ng-template #viewModeLetter1>
-                    <p style="white-space: pre-wrap">
-                      {{ songForm.get('letter1')?.value }}
-                    </p>
-                  </ng-template>
-                </div>
-              </ion-accordion>
-
-              <ion-accordion value="interlude">
-                <ion-item slot="header" color="primary">
-                  <ion-label>Interludio</ion-label>
-                </ion-item>
-                <div class="ion-padding" slot="content">
-                  <ng-container *ngIf="isEditing; else viewModeinterlude">
-                    <ion-textarea
-                      formControlName="interlude"
-                      auto-grow="true"
-                    ></ion-textarea>
-                  </ng-container>
-                  <ng-template #viewModeinterlude>
-                    <p style="white-space: pre-wrap">
-                      {{ songForm.get('interlude')?.value }}
-                    </p>
-                  </ng-template>
-                </div>
-              </ion-accordion>
-
-              <ion-accordion value="letter2">
-                <ion-item slot="header" color="secondary">
-                  <ion-label>Letra y acordes</ion-label>
-                </ion-item>
-                <div class="ion-padding" slot="content">
-                  <ng-container *ngIf="isEditing; else viewModeletter2">
-                    <ion-textarea
-                      formControlName="letter2"
-                      auto-grow="true"
-                    ></ion-textarea>
-                  </ng-container>
-                  <ng-template #viewModeletter2>
-                    <p style="white-space: pre-wrap">
-                      {{ songForm.get('letter2')?.value }}
-                    </p>
-                  </ng-template>
-                </div>
-              </ion-accordion>
-              <!-- Final -->
-              <ion-accordion value="end">
-                <ion-item slot="header" color="primary">
-                  <ion-label>Final</ion-label>
-                </ion-item>
-                <div class="ion-padding" slot="content">
-                  <ng-container *ngIf="isEditing; else viewModeend">
-                    <ion-textarea
-                      formControlName="end"
-                      auto-grow="true"
-                    ></ion-textarea>
-                  </ng-container>
-                  <ng-template #viewModeend>
-                    <p style="white-space: pre-wrap">
-                      {{ songForm.get('end')?.value }}
-                    </p>
-                  </ng-template>
-                </div>
-              </ion-accordion>
-              <!-- label -->
-              <ion-accordion value="label">
-                <ion-item slot="header" color="secondary">
-                  <ion-label>Etiqueta</ion-label>
-                </ion-item>
-                <div class="ion-padding" slot="content">
-                  <ng-container *ngIf="isEditing; else viewModeLabel">
-                    <ion-textarea
-                      formControlName="label"
-                      auto-grow="true"
-                    ></ion-textarea>
-                  </ng-container>
-                  <ng-template #viewModeLabel>
-                    <p style="white-space: pre-wrap">
-                      {{ songForm.get('label')?.value }}
-                    </p>
-                  </ng-template>
-                </div>
-              </ion-accordion>
-            </ion-accordion-group>
-            <div class="buttons">
-              <ion-button *ngIf="!isEditing" (click)="startEditing()"
-                >Editar Canción</ion-button
-              >
-              <ion-button
-                *ngIf="isEditing"
-                (click)="updateSong()"
-                color="success"
-                >Guardar Cambios</ion-button
-              >
-            </div>
+              </div>
+            </ng-container>
           </div>
         </form>
-      </ion-col>
-    </ion-row>
-  </ion-grid>
+      </main>
+
+      <!-- Columna Derecha: Información y Acciones -->
+      <aside class="sidebar-content">
+        <div class="sidebar-sticky-content">
+          <div class="info-card">
+            <div *ngIf="!isEditing; else editTitle">
+              <h1 class="song-title">{{ songForm.get('name')?.value || 'Cargando...' }}</h1>
+            </div>
+            <ng-template #editTitle>
+              <ion-item class="editable-field">
+                <ion-label position="floating">Título</ion-label>
+                <ion-input type="text" formControlName="name"></ion-input>
+              </ion-item>
+            </ng-template>
+
+            <div *ngIf="!isEditing; else editLabel">
+              <p class="label-title">ETIQUETA</p>
+              <ion-chip class="song-label">{{ songForm.get('label')?.value }}</ion-chip>
+            </div>
+            <ng-template #editLabel>
+              <ion-item class="editable-field">
+                <ion-label position="floating">Tonalidad</ion-label>
+                <ion-input type="text" formControlName="label"></ion-input>
+              </ion-item>
+            </ng-template>
+          </div>
+
+          <div class="actions-card">
+            <h2 class="actions-title">Acciones</h2>
+            <div *ngIf="!isEditing; else editingActions">
+              <ion-button expand="block" class="edit-btn" (click)="startEditing()">
+                <ion-icon slot="start" name="create-outline"></ion-icon>
+                Editar Canción
+              </ion-button>
+            </div>
+            <ng-template #editingActions>
+              <ion-button expand="block" color="success" class="save-btn" (click)="updateSong()">
+                <ion-icon slot="start" name="save-outline"></ion-icon>
+                Guardar Cambios
+              </ion-button>
+              <ion-button expand="block" fill="outline" color="medium" (click)="cancelEditing()">
+                Cancelar
+              </ion-button>
+            </ng-template>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
 </ion-content>

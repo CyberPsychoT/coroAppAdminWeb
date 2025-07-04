@@ -1,41 +1,57 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>Título: {{ list?.name || 'List' }}</ion-title>
-  </ion-toolbar>
-</ion-header>
-
 <ion-content [fullscreen]="true">
-  <ng-container *ngFor="let section of sections">
-    <ion-item (click)="section.open = !section.open" color="pastel">
-      <ion-label>{{ section.name }}</ion-label>
-      <ion-icon
-        slot="end"
-        name="chevron-down-outline"
-        *ngIf="!section.open"
-      ></ion-icon>
-      <ion-icon
-        slot="end"
-        name="chevron-up-outline"
-        *ngIf="section.open"
-      ></ion-icon>
-    </ion-item>
-    <div *ngIf="section.open">
-      <ion-list>
-        <ion-item *ngFor="let song of section.songs">
-          <ion-label>{{ song.name }}</ion-label>
-          <ion-select
-            [(ngModel)]="songSections[song.id]"
-            (ionChange)="assignSongToSection(song.id, $event.detail.value)"
-          >
-            <ion-select-option *ngFor="let sec of sections" [value]="sec.name"
-              >{{ sec.name }}</ion-select-option
-            >
-          </ion-select>
-          <ion-button color="medium" (click)="hideSong(song.id)"
-            >Quitar</ion-button
-          >
-        </ion-item>
-      </ion-list>
+  <div class="page-container">
+    <!-- Encabezado de la Página -->
+    <header class="page-header">
+      <ion-button fill="clear" class="back-button" (click)="goBack()">
+        <ion-icon slot="icon-only" name="arrow-back-outline"></ion-icon>
+      </ion-button>
+      <div class="header-text">
+        <h1 class="page-title">{{ list?.name || 'Cargando...' }}</h1>
+        <p class="page-subtitle">Organiza las canciones de la misa</p>
+      </div>
+    </header>
+
+    <!-- Acordeón de Secciones -->
+    <div class="sections-accordion">
+      <ng-container *ngFor="let section of sections; trackBy: trackBySectionName">
+        <div class="section-card" [class.open]="section.open">
+          <ion-item class="section-header" lines="none" (click)="toggleSection(section)">
+            <ion-label class="section-name">{{ section.name }}</ion-label>
+            <span class="song-count">{{ section.songs.length }}</span>
+            <ion-icon class="toggle-icon" slot="end" [name]="section.open ? 'chevron-up-outline' : 'chevron-down-outline'"></ion-icon>
+          </ion-item>
+
+          <div class="section-content">
+            <ion-list *ngIf="section.songs.length > 0; else emptySection" class="songs-in-section">
+              <ion-item *ngFor="let song of section.songs; trackBy: trackBySongId" class="song-item">
+                <div class="song-details" (click)="openSongPage(song.id)">
+                  <ion-icon name="musical-note-outline" class="song-icon"></ion-icon>
+                  <ion-label>{{ song.name }}</ion-label>
+                </div>
+                <div class="song-actions">
+                  <ion-select
+                    class="section-select"
+                    interface="popover"
+                    [(ngModel)]="song.section"
+                    (ionChange)="assignSongToSection(song.id, $event.detail.value)"
+                    (click)="$event.stopPropagation()"
+                  >
+                    <ion-select-option *ngFor="let sec of sections" [value]="sec.name">{{ sec.name }}</ion-select-option>
+                  </ion-select>
+                  <ion-button fill="clear" color="danger" class="remove-btn" (click)="hideSong(song.id); $event.stopPropagation()">
+                    <ion-icon slot="icon-only" name="close-circle-outline"></ion-icon>
+                  </ion-button>
+                </div>
+              </ion-item>
+            </ion-list>
+            <ng-template #emptySection>
+              <div class="empty-state">
+                <p>No hay canciones en esta sección.</p>
+              </div>
+            </ng-template>
+          </div>
+        </div>
+      </ng-container>
     </div>
-  </ng-container>
+  </div>
 </ion-content>

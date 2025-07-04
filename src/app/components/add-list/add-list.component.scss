@@ -1,0 +1,140 @@
+/* Fuentes y Variables */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+
+:host {
+  --page-bg: #f0f2f5;
+  --form-bg: #ffffff;
+  --form-border: #e0e0e0;
+  --field-bg: #f7f7f7;
+  --field-border-focus: var(--menu-item-active-background);
+  --text-primary: #1c1e21;
+  --text-secondary: #606770;
+  --title-color: #333;
+  --section-title-color: var(--menu-item-active-background);
+}
+
+.form-page-container {
+  font-family: 'Roboto', sans-serif;
+  background-color: var(--page-bg);
+  padding: 0 16px;
+  height: 100vh;
+}
+
+/* Encabezado */
+.page-header {
+  display: flex;
+  align-items: center;
+  padding: 16px 0;
+  position: sticky;
+  top: 0;
+  background: var(--page-bg);
+  z-index: 10;
+  
+  .back-button {
+    color: var(--text-secondary);
+    font-size: 24px;
+    margin-right: 8px;
+  }
+
+  .page-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--title-color);
+    margin: 0;
+  }
+}
+
+/* Contenido del Formulario */
+.form-content {
+  background: var(--form-bg);
+  border-radius: 16px;
+  padding: 24px 32px;
+  margin: 0 auto 32px;
+  max-width: 700px; /* Ancho máximo para formularios simples */
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  animation: slideInUp 0.5s ease-out forwards;
+}
+
+.form-section {
+  .section-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--section-title-color);
+    margin-bottom: 20px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--section-title-color);
+    display: inline-block;
+  }
+}
+
+/* Campos del Formulario */
+.form-field {
+  --background: var(--field-bg);
+  --padding-start: 16px;
+  --padding-end: 16px;
+  --border-radius: 12px;
+  --border-width: 1px;
+  --border-style: solid;
+  --border-color: transparent;
+  margin-bottom: 20px;
+  transition: all 0.3s ease-in-out;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+
+  ion-label {
+    font-weight: 500;
+    color: var(--text-secondary);
+  }
+
+  ion-input {
+    --color: var(--text-primary);
+  }
+
+  &.ion-invalid.ion-touched {
+    --border-color: var(--ion-color-danger);
+  }
+
+  &.ion-focused, &:focus-within {
+    --border-color: var(--field-border-focus);
+    box-shadow: 0 4px 12px rgba(var(--menu-item-active-background), 0.15);
+    transform: translateY(-2px);
+  }
+}
+
+/* Acciones del Formulario */
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 16px;
+  margin-top: 32px;
+
+  .submit-btn {
+    --border-radius: 10px;
+    --box-shadow: 0 4px 15px -5px rgba(var(--menu-item-active-background), 0.6);
+    height: 48px;
+    font-weight: 600;
+    text-transform: none;
+    font-size: 1rem;
+  }
+
+  .cancel-btn {
+    --border-radius: 10px;
+    height: 48px;
+    font-weight: 500;
+    text-transform: none;
+    font-size: 1rem;
+    color: var(--text-secondary);
+  }
+}
+
+/* Animaciones */
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
