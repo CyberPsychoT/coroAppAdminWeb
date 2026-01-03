@@ -1,0 +1,230 @@
+/* Fuentes y Variables */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
+:host {
+  --page-bg: #f4f5f8;
+  --card-bg: #ffffff;
+  --text-primary: #1c1e21;
+  --text-secondary: #606770;
+  --border-color: #e0e0e0;
+  --primary-color: var(--ion-color-primary);
+  --danger-color: #eb445a;
+  --card-radius: 16px;
+}
+
+ion-content {
+  --background: var(--page-bg);
+}
+
+.page-container {
+  min-height: 100%;
+  background-color: var(--page-bg);
+  font-family: 'Poppins', sans-serif;
+  padding-bottom: 40px;
+}
+
+/* --- Header --- */
+.page-header {
+  padding: 20px 30px;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(10px);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  border-bottom: 1px solid var(--border-color);
+
+  .header-content {
+    .page-title {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin: 0;
+    }
+
+    .page-subtitle {
+      margin: 5px 0 0;
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+    }
+  }
+}
+
+/* --- Content --- */
+.content-wrapper {
+  padding: 30px;
+  display: flex;
+  justify-content: center;
+}
+
+.form-card {
+  background: var(--card-bg);
+  border-radius: var(--card-radius);
+  padding: 30px;
+  width: 100%;
+  max-width: 600px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+}
+
+.form-section {
+  margin-bottom: 25px;
+
+  .section-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 15px;
+    border-left: 4px solid var(--primary-color);
+    padding-left: 10px;
+  }
+}
+
+/* --- Inputs --- */
+.custom-input {
+  --background: #f8fafc;
+  --border-radius: 12px;
+  --padding-start: 15px;
+  --inner-padding-end: 15px;
+  margin-bottom: 15px;
+  border: 1px solid transparent;
+  transition: all 0.3s ease;
+
+  ion-label {
+    color: var(--text-secondary) !important;
+    font-size: 0.85rem;
+    margin-bottom: 5px;
+  }
+
+  ion-input, ion-textarea {
+    --color: var(--text-primary);
+    font-weight: 500;
+  }
+
+  &.item-has-focus {
+    border-color: var(--primary-color);
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(var(--ion-color-primary-rgb), 0.1);
+  }
+}
+
+.input-group {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* --- File Upload --- */
+.file-upload-area {
+  position: relative;
+  border: 2px dashed #cbd5e1;
+  border-radius: 12px;
+  padding: 30px;
+  text-align: center;
+  transition: all 0.3s ease;
+  background: #f8fafc;
+
+  &:hover {
+    border-color: var(--primary-color);
+    background: #f0f9ff;
+  }
+
+  &.has-file {
+    border-style: solid;
+    border-color: var(--success-color);
+    background: #f0fdf4;
+    
+    .file-label {
+      color: #166534;
+      ion-icon { color: #166534; }
+    }
+  }
+
+  input[type="file"] {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+  }
+
+  .file-label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    color: var(--text-secondary);
+    pointer-events: none;
+
+    ion-icon {
+      font-size: 32px;
+      color: var(--primary-color);
+    }
+
+    span {
+      font-size: 0.95rem;
+      font-weight: 500;
+    }
+
+    .filename {
+      font-weight: 600;
+      word-break: break-all;
+    }
+  }
+}
+
+/* --- Toggle --- */
+.toggle-item {
+  --background: transparent;
+  --padding-start: 0;
+  --inner-padding-end: 0;
+
+  h2 {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+  }
+
+  p {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin: 4px 0 0;
+  }
+}
+
+/* --- Progress --- */
+.progress-section {
+  margin: 20px 0;
+  text-align: center;
+
+  ion-progress-bar {
+    height: 6px;
+    border-radius: 3px;
+  }
+
+  .progress-text {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-top: 8px;
+  }
+}
+
+/* --- Submit Button --- */
+.submit-btn {
+  --border-radius: 12px;
+  --background: var(--primary-color);
+  --box-shadow: 0 4px 12px rgba(var(--ion-color-primary-rgb), 0.3);
+  font-weight: 600;
+  height: 50px;
+  margin-top: 10px;
+  font-size: 1rem;
+
+  &:hover {
+    --box-shadow: 0 6px 16px rgba(var(--ion-color-primary-rgb), 0.4);
+  }
+}

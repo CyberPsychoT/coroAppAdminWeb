@@ -5,7 +5,7 @@
       <ion-button fill="clear" class="back-button" (click)="goToDashboard()">
         <ion-icon slot="icon-only" name="arrow-back-outline"></ion-icon>
       </ion-button>
-      <h1 class="page-title">Agregar Nueva Canción</h1>
+      <h1 class="page-title">Nueva Canción</h1>
     </header>
 
     <!-- Contenedor del Formulario -->
@@ -14,46 +14,55 @@
         
         <!-- Sección de Información Principal -->
         <div class="form-section">
-          <h2 class="section-title">Información Principal</h2>
-          <ion-item class="form-field">
-            <ion-label position="floating">Nombre de la Canción *</ion-label>
-            <ion-input type="text" formControlName="name" required></ion-input>
-            <ion-note slot="error" *ngIf="formAddSong.get('name')?.hasError('required') && formAddSong.get('name')?.touched">El nombre es obligatorio.</ion-note>
+          <h2 class="section-title">Información General</h2>
+          <ion-item class="form-field" lines="none">
+            <ion-label position="stacked">Nombre de la Canción</ion-label>
+            <ion-input type="text" formControlName="name" placeholder="Ej: Amazing Grace"></ion-input>
+            <ion-note slot="error" *ngIf="formAddSong.get('name')?.hasError('required') && formAddSong.get('name')?.touched">
+              El nombre es obligatorio
+            </ion-note>
           </ion-item>
-          <ion-item class="form-field">
-            <ion-label position="floating">Etiqueta</ion-label>
-            <ion-input type="text" formControlName="label"></ion-input>
+          <ion-item class="form-field" lines="none">
+            <ion-label position="stacked">Etiqueta / Categoría</ion-label>
+            <ion-input type="text" formControlName="label" placeholder="Ej: Himno, Adoración"></ion-input>
           </ion-item>
         </div>
 
         <!-- Sección de Estructura de la Canción -->
         <div class="form-section">
-          <h2 class="section-title">Estructura y Letra</h2>
-          <ion-item class="form-field">
-            <ion-label position="floating">Introducción (Acordes)</ion-label>
-            <ion-textarea [autoGrow]="true" formControlName="introduction"></ion-textarea>
+          <h2 class="section-title">Letra y Acordes</h2>
+          
+          <ion-item class="form-field" lines="none">
+            <ion-label position="stacked">Introducción</ion-label>
+            <ion-textarea [autoGrow]="true" rows="2" formControlName="introduction" placeholder="Acordes de introducción..."></ion-textarea>
           </ion-item>
-          <ion-item class="form-field">
-            <ion-label position="floating">Estrofa / Parte 1 (Letra y Acordes)</ion-label>
-            <ion-textarea [autoGrow]="true" rows="6" formControlName="letter1"></ion-textarea>
+
+          <ion-item class="form-field" lines="none">
+            <ion-label position="stacked">Estrofa 1</ion-label>
+            <ion-textarea [autoGrow]="true" rows="4" formControlName="letter1" placeholder="Letra y acordes de la primera estrofa..."></ion-textarea>
           </ion-item>
-          <ion-item class="form-field">
-            <ion-label position="floating">Interludio (Acordes)</ion-label>
-            <ion-textarea [autoGrow]="true" formControlName="interlude"></ion-textarea>
+
+          <ion-item class="form-field" lines="none">
+            <ion-label position="stacked">Interludio</ion-label>
+            <ion-textarea [autoGrow]="true" rows="2" formControlName="interlude" placeholder="Acordes del interludio..."></ion-textarea>
           </ion-item>
-          <ion-item class="form-field">
-            <ion-label position="floating">Estrofa / Parte 2 (Letra y Acordes)</ion-label>
-            <ion-textarea [autoGrow]="true" rows="6" formControlName="letter2"></ion-textarea>
+
+          <ion-item class="form-field" lines="none">
+            <ion-label position="stacked">Estrofa 2</ion-label>
+            <ion-textarea [autoGrow]="true" rows="4" formControlName="letter2" placeholder="Letra y acordes de la segunda estrofa..."></ion-textarea>
           </ion-item>
-          <ion-item class="form-field">
-            <ion-label position="floating">Final (Acordes)</ion-label>
-            <ion-textarea [autoGrow]="true" formControlName="end"></ion-textarea>
+
+          <ion-item class="form-field" lines="none">
+            <ion-label position="stacked">Final</ion-label>
+            <ion-textarea [autoGrow]="true" rows="2" formControlName="end" placeholder="Acordes finales..."></ion-textarea>
           </ion-item>
         </div>
 
         <!-- Acciones del Formulario -->
         <div class="form-actions">
-          <ion-button class="cancel-btn" fill="outline" (click)="goToDashboard()">Cancelar</ion-button>
+          <ion-button class="cancel-btn" fill="outline" (click)="goToDashboard()">
+            Cancelar
+          </ion-button>
           <ion-button class="submit-btn" type="submit" [disabled]="formAddSong.invalid">
             <ion-icon slot="start" name="save-outline"></ion-icon>
             Guardar Canción

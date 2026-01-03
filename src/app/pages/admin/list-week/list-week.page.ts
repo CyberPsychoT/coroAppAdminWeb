@@ -35,7 +35,13 @@ export class ListWeekPage implements OnInit {
     });
 
     this.firestore.getLists().subscribe((lists) => {
-      this.lists = lists.sort((a, b) => a.name.localeCompare(b.name));
+      this.lists = lists.map(list => {
+        // Convertir Timestamp de Firestore a Date de JS si es necesario
+        if (list.createdAt && (list.createdAt as any).toDate) {
+          list.createdAt = (list.createdAt as any).toDate();
+        }
+        return list;
+      }).sort((a, b) => a.name.localeCompare(b.name));
       this.filteredLists = this.lists;
     });
   }
@@ -78,6 +84,25 @@ export class ListWeekPage implements OnInit {
   async clickDelete(list: List) {
     const response = await this.firestore.deleteList(list);
     console.log(response);
+  }
+
+  async toggleStatus(list: List, event: any) {
+    event.stopPropagation(); // Evitar que se abra la lista al hacer click en el toggle
+    const newStatus = event.detail.checked;
+    const updatedList = { ...list, status: newStatus };
+    
+    try {
+      if (list.id) {
+        await this.firestore.updateList(list.id, updatedList);
+        console.log(`List ${list.name} status updated to ${newStatus}`);
+      } else {
+        console.error('List ID is missing');
+      }
+    } catch (error) {
+      console.error('Error updating list status:', error);
+      // Revertir el cambio visual si falla la actualización
+      list.status = !newStatus;
+    }
   }
 
   openAddList() {
@@ -140,7 +165,9 @@ export class ListWeekPage implements OnInit {
   }
 
   //Agregar canciones a lista
-  async presentAddConfirm(listId: string) {
+  async presentAddConfirm(listId: string | undefined) {
+    if (!listId) return;
+    
     const alert = await this.alertController.create({
       header: 'Confirmar adición',
       message: '¿Deseas agregar las canciones seleccionadas a esta lista?',

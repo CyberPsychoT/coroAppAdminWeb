@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { FirestoreService } from 'src/app/services/firestore.service';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-add-song',
@@ -26,18 +27,39 @@ export class AddSongComponent implements OnInit {
   ngOnInit() {}
 
   async onSubmit() {
+    if (this.formAddSong.invalid) {
+      this.formAddSong.markAllAsTouched();
+      return;
+    }
+
     const songData = {
       ...this.formAddSong.value,
     };
 
-    console.log(songData);
-    const response = await this.firestore.addSong(songData);
-    if (response) {
-      console.log('Song added with ID:', response.id);
-      this.router.navigate(['admin/dashboard']); // Decide where to navigate after submission
-    } else {
-      console.error('Failed to add song');
-      // Handle errors appropriately
+    try {
+      const response = await this.firestore.addSong(songData);
+      if (response) {
+        await Swal.fire({
+          title: '¡Guardado!',
+          text: 'La canción se ha guardado correctamente.',
+          icon: 'success',
+          confirmButtonText: 'Aceptar',
+          confirmButtonColor: 'var(--ion-color-primary)',
+          heightAuto: false
+        });
+        this.goToDashboard();
+      } else {
+        throw new Error('No response from server');
+      }
+    } catch (error) {
+      console.error('Error adding song:', error);
+      await Swal.fire({
+        title: 'Error',
+        text: 'Hubo un problema al guardar la canción.',
+        icon: 'error',
+        confirmButtonText: 'Intentar de nuevo',
+        heightAuto: false
+      });
     }
   }
 

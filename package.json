@@ -30,7 +30,9 @@
     "@ionic/angular": "^8.0.0",
     "angular-draggable-droppable": "^8.0.0",
     "ionicons": "^7.0.0",
+    "js-app-parser": "^1.0.1",
     "rxjs": "~7.8.0",
+    "sweetalert2": "^11.26.4",
     "tslib": "^2.3.0",
     "zone.js": "~0.14.2"
   },

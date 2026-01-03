@@ -45,6 +45,12 @@ const routes: Routes = [
     path: 'components/add-list',
     component: AddListComponent,
   },
+  {
+    path: 'admin/update-app',
+    loadChildren: () => import('./pages/admin/update-app/update-app.module').then( m => m.UpdateAppPageModule),
+    ...canActivate(() => redirectUnauthorizedTo(['auth/login'])),
+    canActivate: [ReactivateMenuGuard],
+  },
 ];
 
 @NgModule({

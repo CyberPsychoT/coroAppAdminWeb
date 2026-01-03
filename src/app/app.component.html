@@ -1,34 +1,66 @@
 <ion-app>
   <ion-split-pane contentId="main-content">
     <!-- Menú Lateral -->
-    <ion-menu contentId="main-content" type="overlay">
-      <ion-content>
+    <ion-menu contentId="main-content" type="overlay" class="custom-menu">
+      <ion-content class="menu-content">
+        
         <!-- Sección del Perfil de Usuario -->
-        <div class="user-profile">
-          <ion-avatar>
-            <img alt="Silueta de la cabeza de una persona" src="https://ionicframework.com/docs/img/demos/avatar.svg" />
-          </ion-avatar>
-          <ion-title>{{ userName }}</ion-title>
-          <p>{{ userCargo }}</p>
+        <div class="menu-header">
+          <div class="profile-card">
+            <div class="avatar-container">
+              <img alt="User Avatar" src="https://ionicframework.com/docs/img/demos/avatar.svg" />
+              <div class="status-indicator"></div>
+            </div>
+            <div class="user-info">
+              <ion-title>{{ userName || 'Usuario' }}</ion-title>
+              <p class="user-role">{{ userCargo || 'Miembro del Coro' }}</p>
+            </div>
+          </div>
         </div>
 
         <!-- Lista de Navegación Principal -->
-        <ion-list id="menu-list">
-          <ion-menu-toggle auto-hide="false" *ngFor="let p of appPages; let i = index">
-            <ion-item [routerLink]="[p.url]" routerDirection="root" routerLinkActive="selected" lines="none" detail="false">
-              <ion-icon slot="start" [ios]="p.icon + '-outline'" [md]="p.icon + '-sharp'"></ion-icon>
-              <ion-label>{{ p.title }}</ion-label>
-            </ion-item>
-          </ion-menu-toggle>
-        </ion-list>
+        <div class="menu-items-container">
+          <ion-list lines="none">
+            <ion-menu-toggle auto-hide="false" *ngFor="let p of appPages; let i = index">
+              <ion-item 
+                [routerLink]="[p.url]" 
+                routerDirection="root" 
+                routerLinkActive="selected" 
+                detail="false"
+                class="menu-item">
+                <div class="item-wrapper">
+                  <ion-icon [name]="p.icon" slot="start"></ion-icon>
+                  <ion-label>{{ p.title }}</ion-label>
+                </div>
+                <div class="active-indicator"></div>
+              </ion-item>
+            </ion-menu-toggle>
+
+            <!-- Botón Actualizar APP -->
+            <ion-menu-toggle auto-hide="false">
+              <ion-item 
+                routerLink="/admin/update-app" 
+                routerDirection="root" 
+                routerLinkActive="selected" 
+                detail="false"
+                class="menu-item">
+                <div class="item-wrapper">
+                  <ion-icon name="cloud-upload-outline" slot="start"></ion-icon>
+                  <ion-label>Actualizar APP</ion-label>
+                </div>
+                <div class="active-indicator"></div>
+              </ion-item>
+            </ion-menu-toggle>
+          </ion-list>
+        </div>
       </ion-content>
 
       <!-- Footer del Menú con Botón de Logout -->
-      <ion-footer>
+      <ion-footer class="menu-footer">
         <ion-toolbar>
-          <ion-button expand="block" fill="clear" color="light" (click)="logouth()">
+          <ion-button expand="block" class="logout-btn" (click)="logouth()">
             <ion-icon slot="start" name="log-out-outline"></ion-icon>
-            Cerrar sesión
+            <span>Cerrar Sesión</span>
           </ion-button>
         </ion-toolbar>
       </ion-footer>

@@ -1,0 +1,102 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>update-app</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <div class="page-container">
+    <header class="page-header">
+      <div class="header-content">
+        <h1 class="page-title">Actualizar App Android</h1>
+        <p class="page-subtitle">Sube una nueva versión APK para los usuarios</p>
+      </div>
+    </header>
+
+    <div class="content-wrapper">
+      <div class="form-card">
+        <form [formGroup]="updateForm" (ngSubmit)="onSubmit()">
+          
+          <!-- Sección de Versión -->
+          <div class="form-section">
+            <h3 class="section-title">Detalles de la Versión</h3>
+            <div class="input-group">
+              <ion-item lines="none" class="custom-input">
+                <ion-label position="stacked">Versión (ej: 1.0.2)</ion-label>
+                <ion-input formControlName="version" placeholder="1.0.0"></ion-input>
+              </ion-item>
+              
+              <ion-item lines="none" class="custom-input">
+                <ion-label position="stacked">Build Number (ej: 102)</ion-label>
+                <ion-input type="number" formControlName="build_number" placeholder="100"></ion-input>
+              </ion-item>
+            </div>
+          </div>
+
+          <!-- Sección de Archivo -->
+          <div class="form-section">
+            <h3 class="section-title">Archivo APK</h3>
+            <div class="file-upload-area" [class.has-file]="selectedFile">
+              <input 
+                type="file" 
+                (change)="onFileSelected($event)" 
+                accept=".apk" 
+                id="fileInput"
+                [disabled]="isUploading"
+              >
+              <label for="fileInput" class="file-label">
+                <ion-icon name="cloud-upload-outline"></ion-icon>
+                <span *ngIf="!selectedFile">Haz clic para seleccionar el APK</span>
+                <span *ngIf="selectedFile" class="filename">{{ selectedFile.name }}</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Notas de la Versión -->
+          <div class="form-section">
+            <h3 class="section-title">Notas de la Actualización</h3>
+            <ion-item lines="none" class="custom-input textarea-input">
+              <ion-label position="stacked">Mensaje para los usuarios</ion-label>
+              <ion-textarea 
+                formControlName="mensaje" 
+                rows="4" 
+                placeholder="Describe las novedades y correcciones..."
+              ></ion-textarea>
+            </ion-item>
+          </div>
+
+          <!-- Opciones -->
+          <div class="form-section">
+            <ion-item lines="none" class="toggle-item">
+              <ion-label>
+                <h2>Actualización Obligatoria</h2>
+                <p>Los usuarios deberán actualizar para seguir usando la app</p>
+              </ion-label>
+              <ion-toggle formControlName="obligatoria" color="danger"></ion-toggle>
+            </ion-item>
+          </div>
+
+          <!-- Progreso -->
+          <div class="progress-section" *ngIf="isUploading">
+            <ion-progress-bar [value]="uploadProgress" color="primary"></ion-progress-bar>
+            <p class="progress-text">{{ (uploadProgress * 100) | number:'1.0-0' }}% Subiendo...</p>
+          </div>
+
+          <!-- Botón de Acción -->
+          <div class="form-actions">
+            <ion-button 
+              expand="block" 
+              type="submit" 
+              class="submit-btn" 
+              [disabled]="updateForm.invalid || !selectedFile || isUploading"
+            >
+              <span *ngIf="!isUploading">Publicar Actualización</span>
+              <ion-spinner *ngIf="isUploading" name="crescent"></ion-spinner>
+            </ion-button>
+          </div>
+
+        </form>
+      </div>
+    </div>
+  </div>
+</ion-content>

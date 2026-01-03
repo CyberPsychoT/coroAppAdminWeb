@@ -4,6 +4,7 @@ import { FirestoreService } from 'src/app/services/firestore.service';
 import { FormGroup, FormControl } from '@angular/forms';
 import { Song } from 'src/app/interfaces/song';
 import { Location } from '@angular/common';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-song',
@@ -70,23 +71,37 @@ export class SongPage implements OnInit {
     this.isEditing = false;
   }
 
-  updateSong() {
+  async updateSong() {
     if (this.songForm.invalid) {
       console.error('El formulario no es válido');
       return;
     }
     const updatedData: Partial<Song> = this.songForm.value;
 
-    this.firestoreService
-      .updateSong(updatedData.id as string, updatedData)
-      .then(() => {
-        console.log('Canción actualizada con éxito');
-        this.originalSongData = { ...this.songForm.value }; // Actualizar el estado original
-        this.isEditing = false; // Salir del modo edición
-      })
-      .catch((error) => {
-        console.error('Error al actualizar la canción:', error);
+    try {
+      await this.firestoreService.updateSong(updatedData.id as string, updatedData);
+      
+      await Swal.fire({
+        title: '¡Actualizado!',
+        text: 'La canción se ha actualizado correctamente.',
+        icon: 'success',
+        confirmButtonText: 'Aceptar',
+        confirmButtonColor: 'var(--ion-color-primary)',
+        heightAuto: false
       });
+
+      this.originalSongData = { ...this.songForm.value };
+      this.isEditing = false;
+    } catch (error) {
+      console.error('Error al actualizar la canción:', error);
+      await Swal.fire({
+        title: 'Error',
+        text: 'Hubo un problema al actualizar la canción.',
+        icon: 'error',
+        confirmButtonText: 'Intentar de nuevo',
+        heightAuto: false
+      });
+    }
   }
 
   toggleSection(section: any) {

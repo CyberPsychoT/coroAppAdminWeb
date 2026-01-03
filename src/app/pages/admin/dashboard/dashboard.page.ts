@@ -6,6 +6,7 @@ import { FirestoreService } from 'src/app/services/firestore.service';
 import { AlertController, ModalController } from '@ionic/angular';
 import { doc, deleteDoc, Firestore } from '@angular/fire/firestore';
 import { AddSongComponent } from 'src/app/components/add-song/add-song.component';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-dashboard',
@@ -111,29 +112,34 @@ export class DashboardPage implements OnInit {
 
   //Boton confirmar eliminacion
   async presentDeleteConfirm() {
-    const alert = await this.alertController.create({
-      header: 'Confirmar Eliminación',
-      message:
-        '¿Estás seguro de que quieres eliminar las canciones seleccionadas?',
-      buttons: [
-        {
-          text: 'Cancelar',
-          role: 'cancel',
-          cssClass: 'secondary',
-          handler: (blah) => {
-            console.log('Confirm Cancel: blah');
-          },
-        },
-        {
-          text: 'Confirmar',
-          handler: () => {
-            this.deleteSelectedSongs(); // Llamar a la función de eliminación si el usuario confirma
-          },
-        },
-      ],
+    const selectedCount = this.songs.filter((s) => s.selected).length;
+    
+    if (selectedCount === 0) {
+      return;
+    }
+
+    const { isConfirmed } = await Swal.fire({
+      title: '¿Estás seguro?',
+      text: `¿Seguro que desea eliminar ${selectedCount} cantidad de canciones?`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Sí, eliminar',
+      cancelButtonText: 'Cancelar',
+      heightAuto: false
     });
 
-    await alert.present();
+    if (isConfirmed) {
+      this.deleteSelectedSongs();
+      
+      await Swal.fire({
+        title: '¡Eliminadas!',
+        text: 'Eliminadas perfectamente',
+        icon: 'success',
+        heightAuto: false
+      });
+    }
   }
 
   cancelSelectedSongs() {

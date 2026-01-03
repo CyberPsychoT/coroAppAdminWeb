@@ -3,7 +3,7 @@
     <!-- Encabezado Fijo -->
     <header class="page-header">
       <ion-button fill="clear" class="back-button" (click)="goBack()">
-        <ion-icon slot="icon-only" name="arrow-back-outline"></ion-icon>
+        <ion-icon slot="start" name="arrow-back-outline"></ion-icon>
         Volver al Repertorio
       </ion-button>
     </header>
@@ -21,13 +21,12 @@
                   <ion-label class="section-name">{{ section.title }}</ion-label>
                   <ion-icon class="toggle-icon" slot="end" [name]="section.open ? 'chevron-up-outline' : 'chevron-down-outline'"></ion-icon>
                 </ion-item>
-                <div class="section-content">
+                <div class="section-content" *ngIf="section.open">
                   <div *ngIf="!isEditing; else editSection" class="lyrics-content">
-                    <!-- Usamos un div en lugar de p para evitar márgenes por defecto no deseados -->
                     <div>{{ songForm.get(section.key)?.value }}</div>
                   </div>
                   <ng-template #editSection>
-                    <ion-item class="editable-textarea">
+                    <ion-item class="editable-textarea" lines="none">
                       <ion-textarea [autoGrow]="true" [formControlName]="section.key"></ion-textarea>
                     </ion-item>
                   </ng-template>
@@ -42,26 +41,26 @@
       <aside class="sidebar-content">
         <div class="sidebar-sticky-content">
           <div class="info-card">
-            <div *ngIf="!isEditing; else editTitle">
-              <h1 class="song-title">{{ songForm.get('name')?.value || 'Cargando...' }}</h1>
+            <div *ngIf="!isEditing">
+              <h1 class="song-title">{{ songForm.get('name')?.value || 'Sin Título' }}</h1>
             </div>
-            <ng-template #editTitle>
-              <ion-item class="editable-field">
-                <ion-label position="floating">Título</ion-label>
+            <div *ngIf="isEditing">
+              <ion-item class="editable-field" lines="none">
+                <ion-label position="stacked">Título</ion-label>
                 <ion-input type="text" formControlName="name"></ion-input>
               </ion-item>
-            </ng-template>
-
-            <div *ngIf="!isEditing; else editLabel">
-              <p class="label-title">ETIQUETA</p>
-              <ion-chip class="song-label">{{ songForm.get('label')?.value }}</ion-chip>
             </div>
-            <ng-template #editLabel>
-              <ion-item class="editable-field">
-                <ion-label position="floating">Tonalidad</ion-label>
+
+            <div *ngIf="!isEditing">
+              <p class="label-title">Etiqueta</p>
+              <span class="song-label">{{ songForm.get('label')?.value || 'General' }}</span>
+            </div>
+            <div *ngIf="isEditing">
+              <ion-item class="editable-field" lines="none">
+                <ion-label position="stacked">Etiqueta</ion-label>
                 <ion-input type="text" formControlName="label"></ion-input>
               </ion-item>
-            </ng-template>
+            </div>
           </div>
 
           <div class="actions-card">
@@ -73,7 +72,7 @@
               </ion-button>
             </div>
             <ng-template #editingActions>
-              <ion-button expand="block" color="success" class="save-btn" (click)="updateSong()">
+              <ion-button expand="block" color="primary" class="save-btn" (click)="updateSong()">
                 <ion-icon slot="start" name="save-outline"></ion-icon>
                 Guardar Cambios
               </ion-button>

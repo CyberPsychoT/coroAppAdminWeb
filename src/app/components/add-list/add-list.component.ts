@@ -17,6 +17,7 @@ export class AddListComponent implements OnInit {
       songs: new FormControl([]), // Se cambió 'songIds' a 'songs' para coincidir con la interfaz
       createdAt: new FormControl(new Date()),
       selected: new FormControl(false),
+      status: new FormControl(true),
     });
   }
 

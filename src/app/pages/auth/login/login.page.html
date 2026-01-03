@@ -1,68 +1,77 @@
-<!--
-  * login.page.html
-  * Versión rediseñada basada en la imagen de referencia.
-  * Estructura de dos paneles: uno visual a la izquierda y el formulario a la derecha.
--->
 <ion-content [fullscreen]="true">
-  <!-- Contenedor principal que aloja los dos paneles -->
-  <div class="login-container">
-
-    <!-- Panel Izquierdo (Visual) -->
-    <div class="left-panel">
-      <div class="showcase-card">
-        <ion-icon name="musical-notes-outline"></ion-icon>
-        <h2>Portal del Coro</h2>
-        <p>Tu música, tu voz, tu pasión.</p>
-      </div>
+  <div class="login-wrapper">
+    <!-- Decorative Background Elements -->
+    <div class="circles">
+      <div class="circle circle-1"></div>
+      <div class="circle circle-2"></div>
+      <div class="circle circle-3"></div>
     </div>
 
-    <!-- Panel Derecho (Formulario de Login) -->
-    <div class="right-panel">
-      <div class="login-form-container">
-        
-        <!-- Encabezado del formulario -->
-        <div class="form-header">
-          <h1>Bienvenido de Nuevo</h1>
-          <p>Ingresa tus credenciales para acceder.</p>
+    <!-- Main Container -->
+    <div class="glass-container">
+      
+      <!-- Left Panel (Visual/Branding) -->
+      <div class="brand-panel">
+        <div class="brand-content">
+          <div class="icon-wrapper">
+            <ion-icon name="musical-notes"></ion-icon>
+          </div>
+          <h2>CoroApp</h2>
+          <p>Gestiona tu coro con estilo y profesionalismo.</p>
         </div>
-
-        <!-- Formulario con validación -->
-        <form [formGroup]="formLogin" (ngSubmit)="onSubmit()" class="ion-padding">
-          
-          <!-- Campo de Correo Electrónico -->
-          <ion-item class="input-item" lines="none">
-            <ion-label position="floating">Correo Electrónico</ion-label>
-            <ion-input
-              type="email"
-              formControlName="email"
-              placeholder="tu@correo.com"
-              required
-            ></ion-input>
-          </ion-item>
-
-          <!-- Campo de Contraseña -->
-          <ion-item class="input-item" lines="none">
-            <ion-label position="floating">Contraseña</ion-label>
-            <ion-input
-              type="password"
-              formControlName="password"
-              placeholder="••••••••"
-              required
-            ></ion-input>
-          </ion-item>
-
-          <!-- Botón de Envío -->
-          <ion-button 
-            class="login-button" 
-            type="submit" 
-            expand="block" 
-            [disabled]="formLogin.invalid">
-            Ingresar
-          </ion-button>
-
-        </form>
       </div>
-    </div>
 
+      <!-- Right Panel (Login Form) -->
+      <div class="form-panel">
+        <div class="form-content">
+          <div class="form-header">
+            <h3>Bienvenido</h3>
+            <p>Inicia sesión para continuar</p>
+          </div>
+
+          <form [formGroup]="formLogin" (ngSubmit)="onSubmit()">
+            
+            <div class="input-group">
+              <ion-item lines="none" class="custom-input">
+                <ion-icon name="mail-outline" slot="start"></ion-icon>
+                <ion-input 
+                  formControlName="email" 
+                  type="email" 
+                  placeholder="Correo Electrónico"
+                  required>
+                </ion-input>
+              </ion-item>
+              
+              <ion-item lines="none" class="custom-input">
+                <ion-icon name="lock-closed-outline" slot="start"></ion-icon>
+                <ion-input 
+                  formControlName="password" 
+                  type="password" 
+                  placeholder="Contraseña"
+                  required>
+                </ion-input>
+              </ion-item>
+            </div>
+
+            <div class="actions">
+              <ion-button 
+                expand="block" 
+                type="submit" 
+                class="submit-btn"
+                [disabled]="formLogin.invalid">
+                INGRESAR
+                <ion-icon name="arrow-forward-outline" slot="end"></ion-icon>
+              </ion-button>
+              
+              <div class="forgot-password">
+                <a>¿Olvidaste tu contraseña?</a>
+              </div>
+            </div>
+
+          </form>
+        </div>
+      </div>
+
+    </div>
   </div>
 </ion-content>

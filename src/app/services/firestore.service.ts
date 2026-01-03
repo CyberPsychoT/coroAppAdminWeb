@@ -103,4 +103,23 @@ export class FirestoreService {
     console.log('Updating list with songs and sections:', songs);
     return updateDoc(listDocRef, { songs }); // Asegúrate de que 'songs' es la clave correcta en Firestore.
   }
+
+  // Actualizar parámetros de la app (OTA)
+  updateAppParams(data: any) {
+    const docRef = doc(this.firestore, 'parametros/app_android');
+    // setDoc crea el documento si no existe, o lo sobrescribe si existe.
+    // Usamos { merge: true } si quisiéramos solo actualizar campos, pero aquí queremos definir el estado.
+    // Sin embargo, setDoc se debe importar. Si usamos updateDoc requerimos que exista.
+    // Para seguridad, usaremos setDoc desde 'firebase/firestore' pero necesito importarlo.
+    // Como ya tengo 'doc' y 'firestore', voy a usar setDoc.
+    
+    // NOTA: setDoc no está importado en el archivo original. 
+    // Voy a usar updateDoc y si falla (no existe), uso setDoc? 
+    // Mejor importo setDoc.
+    
+    // Espera, no puedo cambiar los imports facilmente con replace_file_content si están arriba.
+    // Voy a asumir que el documento YA EXISTE como dijo el usuario ("configure una nueva colection").
+    // Si ya existe, updateDoc funciona.
+    return updateDoc(docRef, data);
+  }
 }

@@ -7,4 +7,5 @@ export interface List {
   songs: ListSong[];
   createdAt?: Date;
   selected?: boolean;
+  status?: boolean;
 }

@@ -1,19 +1,18 @@
-import { Component } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { AuthService } from './services/auth.service';
-import { ToastController } from '@ionic/angular';
 import { Router } from '@angular/router';
-import { Subscription, finalize } from 'rxjs';
-import { FirestoreService } from './services/firestore.service';
+import { Subscription } from 'rxjs';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-root',
   templateUrl: 'app.component.html',
   styleUrls: ['app.component.scss'],
 })
-export class AppComponent {
+export class AppComponent implements OnDestroy {
   public appPages = [
-    { title: 'Canciones', url: '/admin/dashboard', icon: 'newspaper' },
-    { title: 'Lista semanal', url: '/admin/list-week', icon: 'newspaper' },
+    { title: 'Canciones', url: '/admin/dashboard', icon: 'musical-notes' },
+    { title: 'Lista semanal', url: '/admin/list-week', icon: 'calendar' },
   ];
   userName: string | null = null;
   userCargo: string | null = null;
@@ -22,39 +21,61 @@ export class AppComponent {
 
   constructor(
     private authService: AuthService,
-    private toastController: ToastController,
     private router: Router
   ) {
-    (this.userNameSubscription = this.authService.userName$.subscribe(
+    this.userNameSubscription = this.authService.userName$.subscribe(
       (name) => {
         this.userName = name;
       }
-    )),
-      this.authService.userCargo$.subscribe((cargo) => {
-        this.userCargo = cargo;
-      });
-  }
-
-  //Toast
-  async presentToast(message: string, position: 'bottom', color: string) {
-    const toast = await this.toastController.create({
-      message: message,
-      duration: 2000,
-      position: position,
-      color: color,
+    );
+    
+    this.authService.userCargo$.subscribe((cargo) => {
+      this.userCargo = cargo;
     });
-
-    await toast.present();
   }
-  //Cierre de sesion
+
+  // Cierre de sesión con SweetAlert2
   logouth() {
-    this.authService
-      .logout()
-      .then(() => {
-        this.presentToast('Sesion finalizada correctamente', 'bottom', 'dark');
-        this.router.navigate(['auth/login']);
-      })
-      .catch((error) => console.log(error));
+    Swal.fire({
+      title: '¿Cerrar Sesión?',
+      text: "¿Estás seguro que deseas salir?",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#ff8c00', // Primary Orange
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Sí, salir',
+      cancelButtonText: 'Cancelar',
+      heightAuto: false,
+      customClass: {
+        popup: 'custom-swal-popup'
+      }
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.authService.logout()
+          .then(() => {
+            // Optional: Show goodbye message
+            const Toast = Swal.mixin({
+              toast: true,
+              position: 'bottom',
+              showConfirmButton: false,
+              timer: 2000,
+              timerProgressBar: true,
+              didOpen: (toast) => {
+                toast.addEventListener('mouseenter', Swal.stopTimer)
+                toast.addEventListener('mouseleave', Swal.resumeTimer)
+              }
+            });
+
+            Toast.fire({
+              icon: 'success',
+              title: 'Sesión finalizada correctamente'
+            });
+
+            this.router.navigate(['auth/login']);
+          })
+          .catch((error) => console.log(error));
+      }
+    });
   }
 
   ngOnDestroy() {
