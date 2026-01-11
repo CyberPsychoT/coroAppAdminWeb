@@ -8,4 +8,5 @@ export interface List {
   createdAt?: Date;
   selected?: boolean;
   status?: boolean;
+  loading?: boolean;
 }

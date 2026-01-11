@@ -6,6 +6,7 @@ import { FirestoreService } from 'src/app/services/firestore.service';
 import { List } from 'src/app/interfaces/list';
 import { AlertController, ToastController } from '@ionic/angular';
 import { first } from 'rxjs/operators';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-list-week',
@@ -18,6 +19,8 @@ export class ListWeekPage implements OnInit {
   searchTerm: string = '';
   showCheckboxes: boolean = false;
   selectedSongs: string[] = [];
+
+
 
   constructor(
     private router: Router,
@@ -102,6 +105,73 @@ export class ListWeekPage implements OnInit {
       console.error('Error updating list status:', error);
       // Revertir el cambio visual si falla la actualización
       list.status = !newStatus;
+    }
+  }
+
+  async editList(list: List, event: any) {
+    event.stopPropagation();
+    
+    // 1. Mostrar Input con SweetAlert2
+    const { value: newName } = await Swal.fire({
+      title: 'Editar Nombre de Lista',
+      input: 'text',
+      inputLabel: 'Nuevo nombre',
+      inputValue: list.name,
+      showCancelButton: true,
+      confirmButtonText: 'Guardar',
+      cancelButtonText: 'Cancelar',
+      confirmButtonColor: '#ff8c00', // Primary Orange
+      cancelButtonColor: '#d33',
+      heightAuto: false, // Recommended for Ionic
+      inputValidator: (value) => {
+        if (!value) {
+          return '¡El nombre no puede estar vacío!';
+        }
+        return null;
+      }
+    });
+
+    if (newName && newName !== list.name) {
+      this.updateListName(list, newName);
+    }
+  }
+
+  async updateListName(list: List, newName: string) {
+    if (!list.id) return;
+
+    // 2. Mostrar Loading "Cambiando nombre..."
+    Swal.fire({
+      title: 'Cambiando nombre de la lista...',
+      allowOutsideClick: false,
+      heightAuto: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
+
+    try {
+      await this.firestore.updateList(list.id, { name: newName });
+      
+      // 3. Mostrar Éxito (Verde)
+      Swal.fire({
+        icon: 'success',
+        title: '¡Éxito!',
+        text: 'Nombre modificado correctamente',
+        timer: 2000,
+        heightAuto: false,
+        showConfirmButton: false
+      });
+      
+    } catch (error) {
+      console.error('Error updating list name:', error);
+      
+      // 4. Mostrar Error (Rojo)
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Hubo un problema al actualizar el nombre',
+        heightAuto: false
+      });
     }
   }
 

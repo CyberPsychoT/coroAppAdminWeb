@@ -91,7 +91,13 @@
           </div>
 
           <div class="card-body">
-            <h3 class="list-name">{{ list.name }}</h3>
+            <div class="list-name-container" style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+              <h3 class="list-name" style="margin: 0;">{{ list.name }}</h3>
+              
+              <ion-button fill="clear" size="small" (click)="editList(list, $event)" *ngIf="!showCheckboxes" style="--padding-start: 4px; --padding-end: 4px; height: 24px;">
+                <ion-icon name="create-outline" style="font-size: 1.2rem;"></ion-icon>
+              </ion-button>
+            </div>
             <p class="song-count">
               <ion-icon name="musical-note"></ion-icon>
               {{ list.songs.length || 0 }} canciones
