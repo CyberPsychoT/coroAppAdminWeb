@@ -143,7 +143,7 @@ export class DashboardPage implements OnInit {
   }
 
   cancelSelectedSongs() {
-    this.filteredSongs.forEach((song) => (song.selected = false));
+    this.songs.forEach((song) => (song.selected = false));
     // Ocultar los botones al cancelar
     this.showConfirmationButtons = false;
   }
@@ -157,8 +157,15 @@ export class DashboardPage implements OnInit {
     this.selectedSongs = this.songs
       .filter((song) => song.selected)
       .map((song) => song.id);
+
+    this.cancelSelectedSongs();
+
     this.router.navigate(['admin/list-week'], {
       queryParams: { selectedSongs: JSON.stringify(this.selectedSongs) },
     });
+  }
+
+  getSelectedCount(): number {
+    return this.songs.filter(s => s.selected).length;
   }
 }

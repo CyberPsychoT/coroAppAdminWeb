@@ -284,6 +284,7 @@ export class ListWeekPage implements OnInit {
             .then(async () => {
               console.log('Canciones añadidas con éxito');
               await this.presentToast(songsToAdd.length);
+              this.selectedSongs = []; // Clean the array to hide the banner
             })
             .catch((error) => {
               console.error('Error updating list:', error);

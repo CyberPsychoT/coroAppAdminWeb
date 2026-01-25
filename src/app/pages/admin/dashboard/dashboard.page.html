@@ -18,32 +18,37 @@
           >
         </div>
         
-        <div class="action-buttons">
+    <div class="action-buttons">
           <button class="icon-btn add-btn" (click)="openAddSongModal()" title="Agregar Canción">
             <ion-icon name="add"></ion-icon>
           </button>
-          <button class="icon-btn delete-btn" (click)="toggleConfirmationButtons()" title="Eliminar Canciones">
-            <ion-icon name="trash-outline"></ion-icon>
+          <button class="icon-btn select-btn" (click)="toggleConfirmationButtons()" title="Seleccionar">
+            <ion-icon name="checkmark-circle-outline"></ion-icon>
           </button>
           <button class="icon-btn list-btn" (click)="showLists()" title="Ver Listas">
             <ion-icon name="list-outline"></ion-icon>
+            <!-- <ion-badge *ngIf="getSelectedCount() > 0" color="danger">{{ getSelectedCount() }}</ion-badge> -->
           </button>
         </div>
       </div>
     </header>
 
-    <!-- Botones de Confirmación de Eliminación -->
+    <!-- Barra de Acciones de Selección -->
     <div class="confirmation-container" *ngIf="showConfirmationButtons">
         <div class="confirm-content">
-          <ion-icon name="warning-outline" class="warning-icon"></ion-icon>
-          <p>Selecciona las canciones que deseas eliminar</p>
+          <p>Seleccionadas: {{ getSelectedCount() }}</p>
         </div>
         <div class="confirmation-buttons">
+            <button class="confirm-btn add-list" (click)="showLists()">
+                <ion-icon name="list-outline"></ion-icon>
+                Agregar
+            </button>
             <button class="confirm-btn delete" (click)="presentDeleteConfirm()">
-                Eliminar Seleccionadas
+                <ion-icon name="trash-outline"></ion-icon>
+                Eliminar
             </button>
             <button class="confirm-btn cancel" (click)="cancelSelectedSongs()">
-                Cancelar
+                <ion-icon name="close-outline"></ion-icon>
             </button>
         </div>
     </div>

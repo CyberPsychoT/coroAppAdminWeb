@@ -128,12 +128,12 @@ ion-content {
         }
       }
 
-      &.delete-btn {
-        background: rgba(255, 69, 0, 0.1);
-        color: var(--ion-color-secondary);
+      &.select-btn {
+        background: rgba(var(--ion-color-primary-rgb), 0.1);
+        color: var(--ion-color-primary);
 
         &:hover {
-          background: rgba(255, 69, 0, 0.2);
+          background: rgba(var(--ion-color-primary-rgb), 0.2);
         }
       }
 
@@ -195,6 +195,15 @@ ion-content {
       cursor: pointer;
       font-family: inherit;
       transition: all 0.2s;
+
+      &.add-list {
+        background: var(--ion-color-primary);
+        color: white;
+
+        &:hover {
+          background: var(--ion-color-primary-shade);
+        }
+      }
 
       &.delete {
         background: var(--ion-color-secondary);
