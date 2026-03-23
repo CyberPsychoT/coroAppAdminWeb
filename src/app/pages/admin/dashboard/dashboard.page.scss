@@ -259,7 +259,7 @@ ion-content {
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   border: 1px solid transparent;
   animation: scaleIn 0.4s ease-out backwards;
-
+  
   // Staggered animation
   @for $i from 1 through 100 {
     &:nth-child(#{$i}) {
@@ -274,7 +274,7 @@ ion-content {
     align-items: center;
     text-align: center;
     height: 100%;
-
+    
     .icon-box {
       width: 50px;
       height: 50px;
@@ -285,44 +285,49 @@ ion-content {
       justify-content: center;
       margin-bottom: 15px;
       transition: all 0.3s ease;
-
+      
       ion-icon {
         font-size: 24px;
         color: var(--ion-color-primary);
       }
     }
-
+    
     .song-title {
       font-size: 1rem;
       font-weight: 600;
       color: $text-primary;
       margin: 0;
       line-height: 1.4;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
     }
   }
-
+  
   // Hover Effect
   &:hover {
     transform: translateY(-5px);
     background: lighten($card-bg, 3%);
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-
+    box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+    
     .icon-box {
       background: var(--ion-color-primary);
-
+      
       ion-icon {
         color: white;
       }
     }
   }
-
+  
   // Selection Mode
   .selection-overlay {
     position: absolute;
     top: 10px;
     right: 10px;
     z-index: 2;
-
+    
     .checkbox {
       width: 24px;
       height: 24px;
@@ -333,11 +338,11 @@ ion-content {
       align-items: center;
       justify-content: center;
       transition: all 0.2s;
-
+      
       &.checked {
         background: var(--ion-color-primary);
         border-color: var(--ion-color-primary);
-
+        
         ion-icon {
           color: white;
           font-size: 16px;
@@ -345,7 +350,7 @@ ion-content {
       }
     }
   }
-
+  
   &.selected {
     border-color: var(--ion-color-primary);
     background: rgba(255, 140, 0, 0.05);
@@ -353,15 +358,8 @@ ion-content {
 }
 
 @keyframes scaleIn {
-  from {
-    opacity: 0;
-    transform: scale(0.9);
-  }
-
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
 }
 
 // --- Empty State ---
@@ -372,7 +370,7 @@ ion-content {
   justify-content: center;
   padding: 60px 20px;
   text-align: center;
-
+  
   .empty-icon {
     width: 100px;
     height: 100px;
@@ -382,20 +380,20 @@ ion-content {
     align-items: center;
     justify-content: center;
     margin-bottom: 20px;
-
+    
     ion-icon {
       font-size: 50px;
       color: $text-secondary;
       opacity: 0.5;
     }
   }
-
+  
   h3 {
     color: $text-primary;
     font-size: 1.5rem;
     margin: 0 0 10px;
   }
-
+  
   p {
     color: $text-secondary;
     max-width: 300px;
