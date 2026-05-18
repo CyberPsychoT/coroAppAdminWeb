@@ -9,11 +9,10 @@
     </header>
 
     <!-- Grid de Contenido Principal -->
-    <div class="content-grid">
+    <form class="content-grid" [formGroup]="songForm" (ngSubmit)="updateSong()">
       <!-- Columna Izquierda: Cuerpo de la Canción -->
       <main class="main-content">
-        <form [formGroup]="songForm" (ngSubmit)="updateSong()">
-          <div class="song-body">
+        <div class="song-body">
             <ng-container *ngFor="let section of songSections; trackBy: trackByKey">
               <!-- Solo muestra la sección si está en modo edición o si tiene contenido -->
               <div class="section-card" [class.open]="section.open" *ngIf="isEditing || songForm.get(section.key)?.value">
@@ -33,8 +32,7 @@
                 </div>
               </div>
             </ng-container>
-          </div>
-        </form>
+        </div>
       </main>
 
       <!-- Columna Derecha: Información y Acciones -->
@@ -83,6 +81,6 @@
           </div>
         </div>
       </aside>
-    </div>
+    </form>
   </div>
 </ion-content>
