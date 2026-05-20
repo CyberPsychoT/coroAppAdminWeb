@@ -1,41 +1,446 @@
 /*
- * App Global CSS
- * ----------------------------------------------------------------------------
- * Put style rules here that you want to apply globally. These styles are for
- * the entire app and not just one component. Additionally, this file can be
- * used as an entry point to import other CSS/Sass files to be included in the
- * output CSS.
- * For more information on global stylesheets, visit the documentation:
- * https://ionicframework.com/docs/layout/global-stylesheets
+ * App Global CSS — coroAppAdminWeb
+ * Premium Design System: Skeleton Loaders, Toasts, Micro-animations, Accessibility
  */
 
-/* Core CSS required for Ionic components to work properly */
+/* Core Ionic */
 @import "@ionic/angular/css/core.css";
-
-/* Basic CSS for apps built with Ionic */
 @import "@ionic/angular/css/normalize.css";
 @import "@ionic/angular/css/structure.css";
 @import "@ionic/angular/css/typography.css";
 @import "@ionic/angular/css/display.css";
 
-/* Optional CSS utils that can be commented out */
+/* Optional Ionic utils */
 @import "@ionic/angular/css/padding.css";
 @import "@ionic/angular/css/float-elements.css";
 @import "@ionic/angular/css/text-alignment.css";
 @import "@ionic/angular/css/text-transformation.css";
 @import "@ionic/angular/css/flex-utils.css";
 
-/**
- * Ionic Dark Mode
- * -----------------------------------------------------
- * For more info, please see:
- * https://ionicframework.com/docs/theming/dark-mode
- */
-
-/* @import "@ionic/angular/css/palettes/dark.always.css"; */
-/* @import "@ionic/angular/css/palettes/dark.class.css"; */
-/* @import "@ionic/angular/css/palettes/dark.system.css"; */
-
-/* Fuentes y Variables Globales sidemenu */
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+/* SweetAlert2 */
 @import 'sweetalert2/dist/sweetalert2.min.css';
+
+/* Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+/* ============================================================
+   RESET & BASE
+   ============================================================ */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-family: var(--font-family, 'Inter', sans-serif);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* ============================================================
+   MICRO-ANIMATIONS GLOBALES
+   ============================================================ */
+
+/* Entrada suave general */
+@keyframes fade-slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes slide-down {
+  from {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes bounce-in {
+  0%   { opacity: 0; transform: scale(0.7); }
+  60%  { opacity: 1; transform: scale(1.05); }
+  80%  { transform: scale(0.97); }
+  100% { transform: scale(1); }
+}
+
+/* Pulsado continuo para íconos en empty-state / banners */
+@keyframes pulse-icon {
+  0%, 100% { transform: scale(1); opacity: 0.7; }
+  50%       { transform: scale(1.12); opacity: 1; }
+}
+
+/* Shimmer para Skeleton Loaders */
+@keyframes shimmer {
+  0%   { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+
+/* Toast slide-in from bottom */
+@keyframes toast-slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Spin para loading icons */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Clases de animación rápidas */
+.anim-fade-up    { animation: fade-slide-up var(--transition-slow, 400ms) ease both; }
+.anim-scale-in   { animation: scale-in var(--transition-base, 250ms) ease both; }
+.anim-slide-down { animation: slide-down var(--transition-base, 250ms) ease both; }
+.anim-fade       { animation: fade-in var(--transition-fast, 150ms) ease both; }
+.anim-bounce-in  { animation: bounce-in var(--transition-bounce, 500ms) both; }
+.pulse-icon      { animation: pulse-icon 2.4s ease-in-out infinite; }
+
+// ============================================================
+// SKELETON LOADERS
+// ============================================================
+@keyframes shimmer {
+  0%   { background-position: -800px 0; }
+  100% { background-position: 800px 0; }
+}
+
+%skeleton-shimmer {
+  border-radius: var(--radius-sm, 8px);
+  background-color: #e2e8f0;
+  background-image: linear-gradient(
+    90deg,
+    #e2e8f0 0%,
+    #f1f5f9 40%,
+    #e2e8f0 80%
+  );
+  background-size: 800px 100%;
+  background-repeat: no-repeat;
+  animation: shimmer 1.6s linear infinite;
+  display: block;
+}
+
+.skeleton-line {
+  @extend %skeleton-shimmer;
+  height: 14px;
+  width: 100%;
+
+  &.sm  { height: 10px; }
+  &.lg  { height: 18px; }
+  &.w-1\/2 { width: 50%; }
+  &.w-2\/3 { width: 66%; }
+  &.w-3\/4 { width: 75%; }
+}
+
+.skeleton-circle {
+  @extend %skeleton-shimmer;
+  border-radius: var(--radius-full, 9999px);
+  width: 48px;
+  height: 48px;
+  flex-shrink: 0;
+
+  &.sm  { width: 32px;  height: 32px; }
+  &.lg  { width: 64px;  height: 64px; }
+  &.xl  { width: 80px;  height: 80px; }
+}
+
+.skeleton-rect {
+  @extend %skeleton-shimmer;
+  height: 44px;
+  width: 100%;
+  border-radius: var(--radius-md, 12px);
+}
+
+// Dark mode skeleton
+.dark-theme .skeleton-line,
+.dark-theme .skeleton-circle,
+.dark-theme .skeleton-rect {
+  background-color: #1e2d45;
+  background-image: linear-gradient(
+    90deg,
+    #1e2d45 0%,
+    #243252 40%,
+    #1e2d45 80%
+  );
+}
+
+@media (prefers-color-scheme: dark) {
+  body:not(.light-theme) .skeleton-line,
+  body:not(.light-theme) .skeleton-circle,
+  body:not(.light-theme) .skeleton-rect {
+    background-color: #1e2d45;
+    background-image: linear-gradient(
+      90deg,
+      #1e2d45 0%,
+      #243252 40%,
+      #1e2d45 80%
+    );
+  }
+}
+
+/* Skeleton Card — Song Grid */
+.skeleton-song-card {
+  background: var(--surface-1, #ffffff);
+  border-radius: var(--radius-lg, 16px);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid var(--border-color, #e2e8f0);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Skeleton Card — List Week */
+.skeleton-list-card {
+  background: var(--surface-1, #ffffff);
+  border-radius: var(--radius-lg, 16px);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  border: 1px solid var(--border-color, #e2e8f0);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+
+  .skeleton-card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+}
+
+/* ============================================================
+   TOAST NOTIFICATIONS ELEGANTES
+   ============================================================ */
+ion-toast.app-toast {
+  --border-radius: var(--radius-md, 12px);
+  --box-shadow: var(--shadow-lg, 0 8px 32px rgba(0,0,0,0.12));
+  --min-width: 280px;
+  --max-width: 400px;
+  font-family: var(--font-family, 'Inter', sans-serif);
+  font-size: 0.9rem;
+  font-weight: 500;
+  animation: toast-slide-in 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+
+  &::part(container) {
+    gap: 10px;
+  }
+
+  &.toast-success {
+    --background: #dcfce7;
+    --color: #166534;
+    --border-color: #86efac;
+    border: 1.5px solid var(--border-color);
+  }
+
+  &.toast-error {
+    --background: #fee2e2;
+    --color: #991b1b;
+    --border-color: #fca5a5;
+    border: 1.5px solid var(--border-color);
+  }
+
+  &.toast-info {
+    --background: rgba(255, 140, 0, 0.1);
+    --color: #92400e;
+    --border-color: rgba(255, 140, 0, 0.3);
+    border: 1.5px solid var(--border-color);
+  }
+}
+
+/* Toast dark mode — standalone selectors (no & nesting at root) */
+.dark-theme ion-toast.app-toast.toast-success {
+  --background: #052e16;
+  --color: #86efac;
+  --border-color: #166534;
+}
+.dark-theme ion-toast.app-toast.toast-error {
+  --background: #3b0000;
+  --color: #fca5a5;
+  --border-color: #7f1d1d;
+}
+.dark-theme ion-toast.app-toast.toast-info {
+  --background: rgba(255, 154, 31, 0.12);
+  --color: #ffb347;
+  --border-color: rgba(255, 154, 31, 0.25);
+}
+
+@media (prefers-color-scheme: dark) {
+  body:not(.light-theme) ion-toast.app-toast.toast-success {
+    --background: #052e16;
+    --color: #86efac;
+    --border-color: #166534;
+  }
+  body:not(.light-theme) ion-toast.app-toast.toast-error {
+    --background: #3b0000;
+    --color: #fca5a5;
+    --border-color: #7f1d1d;
+  }
+  body:not(.light-theme) ion-toast.app-toast.toast-info {
+    --background: rgba(255, 154, 31, 0.12);
+    --color: #ffb347;
+    --border-color: rgba(255, 154, 31, 0.25);
+  }
+}
+
+/* ============================================================
+   ACCESIBILIDAD
+   ============================================================ */
+
+/* Focus-visible ring visible y accesible */
+:focus-visible {
+  outline: 2px solid var(--ion-color-primary, #ff8c00);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm, 8px);
+}
+
+/* Skip-to-content (screen readers) */
+.skip-link {
+  position: absolute;
+  top: -999px;
+  left: 0;
+  background: var(--ion-color-primary);
+  color: white;
+  padding: 8px 16px;
+  z-index: 9999;
+  border-radius: 0 0 var(--radius-sm) 0;
+
+  &:focus {
+    top: 0;
+  }
+}
+
+/* Respeto a preferencia de movimiento reducido */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .skeleton-base,
+  .skeleton-line,
+  .skeleton-circle,
+  .skeleton-rect {
+    animation: none !important;
+    background: var(--surface-3, #f1f5f9) !important;
+  }
+}
+
+/* ============================================================
+   SWEETALERT2 — Estilos personalizados
+   ============================================================ */
+.swal2-container .swal2-popup {
+  font-family: var(--font-family, 'Inter', sans-serif) !important;
+  border-radius: var(--radius-xl, 24px) !important;
+  padding: 2rem !important;
+  box-shadow: var(--shadow-lg) !important;
+}
+
+.swal2-container .swal2-title {
+  font-size: 1.35rem !important;
+  font-weight: 700 !important;
+}
+
+.swal2-container .swal2-confirm {
+  font-family: var(--font-family, 'Inter', sans-serif) !important;
+  font-weight: 600 !important;
+  border-radius: var(--radius-md, 12px) !important;
+  padding: 10px 24px !important;
+}
+
+.swal2-container .swal2-cancel {
+  font-family: var(--font-family, 'Inter', sans-serif) !important;
+  font-weight: 600 !important;
+  border-radius: var(--radius-md, 12px) !important;
+  padding: 10px 24px !important;
+}
+
+/* SweetAlert2 dark mode */
+.dark-theme .swal2-container .swal2-popup {
+  background: var(--surface-2, #1a2235) !important;
+  color: var(--text-primary, #f1f5f9) !important;
+}
+.dark-theme .swal2-container .swal2-title {
+  color: var(--text-primary, #f1f5f9) !important;
+}
+
+@media (prefers-color-scheme: dark) {
+  body:not(.light-theme) .swal2-container .swal2-popup {
+    background: var(--surface-2, #1a2235) !important;
+    color: var(--text-primary, #f1f5f9) !important;
+  }
+  body:not(.light-theme) .swal2-container .swal2-title {
+    color: var(--text-primary, #f1f5f9) !important;
+  }
+}
+
+/* ============================================================
+   ION-CONTENT BACKGROUND GLOBAL
+   ============================================================ */
+ion-content {
+  --background: var(--app-bg);
+}
+
+/* ============================================================
+   ION-MENU DARK MODE
+   ============================================================ */
+.dark-theme ion-menu {
+  --ion-item-background: transparent;
+}
+
+@media (prefers-color-scheme: dark) {
+  body:not(.light-theme) ion-menu {
+    --ion-item-background: transparent;
+  }
+}
+
+/* ============================================================
+   SCROLLBAR CUSTOM (WebKit)
+   ============================================================ */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-color, #e2e8f0);
+  border-radius: var(--radius-full, 9999px);
+  transition: background var(--transition-fast);
+
+  &:hover {
+    background: var(--text-tertiary, #94a3b8);
+  }
+}

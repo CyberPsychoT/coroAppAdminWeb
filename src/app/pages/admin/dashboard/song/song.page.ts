@@ -5,6 +5,7 @@ import { FormGroup, FormControl } from '@angular/forms';
 import { Song } from 'src/app/interfaces/song';
 import { Location } from '@angular/common';
 import Swal from 'sweetalert2';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-song',
@@ -28,7 +29,8 @@ export class SongPage implements OnInit {
   constructor(
     private activatedRoute: ActivatedRoute,
     private firestoreService: FirestoreService,
-    private location: Location
+    private location: Location,
+    private sanitizer: DomSanitizer
   ) {
     this.songForm = new FormGroup({
       id: new FormControl(''),
@@ -114,5 +116,38 @@ export class SongPage implements OnInit {
   
   goBack() {
     this.location.back();
+  }
+
+  parseChords(text: string): SafeHtml {
+    if (!text) return '';
+    
+    // Si el texto no contiene corchetes, se asume que es formato antiguo.
+    // Retornamos el texto con un div que preserva el formato de espacios (pre-wrap).
+    if (!text.includes('[')) {
+       return this.sanitizer.bypassSecurityTrustHtml(`<div style="white-space: pre-wrap; font-family: Consolas, 'Roboto Mono', monospace;">${text}</div>`);
+    }
+
+    const lines = text.split('\n');
+    let htmlOutput = '';
+
+    lines.forEach(line => {
+      if (line.trim() === '') {
+        htmlOutput += '<br>';
+        return;
+      }
+
+      let parsedLine = line.replace(/\[(.*?)\]([^\[]*)/g, (match, chord, lyric) => {
+        return `<span class="chord-wrapper"><span class="chord">${chord}</span><span class="lyric">${lyric.replace(/ /g, '&nbsp;')}</span></span>`;
+      });
+
+      if (!line.startsWith('[')) {
+        const firstPart = line.split('[')[0];
+        parsedLine = `<span class="lyric">${firstPart.replace(/ /g, '&nbsp;')}</span>` + parsedLine.substring(firstPart.length);
+      }
+
+      htmlOutput += `<div class="lyric-line">${parsedLine}</div>`;
+    });
+
+    return this.sanitizer.bypassSecurityTrustHtml(htmlOutput);
   }
 }

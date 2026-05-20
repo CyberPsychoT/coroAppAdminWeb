@@ -1,39 +1,55 @@
 <ion-content [fullscreen]="true">
   <div class="page-container">
-    <!-- Encabezado Fijo -->
-    <header class="page-header">
+
+    <!-- ══ Header ════════════════════════════════════════════ -->
+    <header class="page-header" role="banner">
       <div class="header-content">
         <h1 class="page-title">Listas Semanales</h1>
         <p class="page-subtitle">Gestiona tus repertorios</p>
       </div>
-      
-      <div class="header-actions">
-        <div class="search-wrapper">
-          <ion-icon name="search-outline"></ion-icon>
-          <input 
-            type="text" 
-            placeholder="Buscar lista..." 
-            [(ngModel)]="searchTerm" 
+
+      <div class="header-actions" role="toolbar" aria-label="Acciones de listas">
+        <div class="search-wrapper" role="search">
+          <ion-icon name="search-outline" aria-hidden="true"></ion-icon>
+          <input
+            id="search-lists"
+            type="search"
+            placeholder="Buscar lista..."
+            [(ngModel)]="searchTerm"
             (input)="filterLists()"
+            aria-label="Buscar lista semanal"
           >
         </div>
-        
-        <button class="action-btn add-btn" (click)="openAddList()">
-          <ion-icon name="add-outline"></ion-icon>
+
+        <button
+          id="btn-add-list"
+          class="action-btn add-btn"
+          (click)="openAddList()"
+          aria-label="Crear nueva lista">
+          <ion-icon name="add-outline" aria-hidden="true"></ion-icon>
           <span>Nueva Lista</span>
         </button>
-        
-        <button class="action-btn delete-btn" (click)="confirmDelete()" *ngIf="!showCheckboxes && lists.length > 0">
-          <ion-icon name="trash-outline"></ion-icon>
+
+        <button
+          id="btn-delete-lists"
+          class="action-btn delete-btn"
+          (click)="confirmDelete()"
+          *ngIf="!showCheckboxes && lists.length > 0"
+          aria-label="Seleccionar listas para eliminar">
+          <ion-icon name="trash-outline" aria-hidden="true"></ion-icon>
         </button>
       </div>
     </header>
 
-    <!-- Banner de Selección de Canciones -->
-    <div class="info-banner slide-in" *ngIf="selectedSongs.length > 0 && !showCheckboxes">
+    <!-- ══ Banner: Canciones Seleccionadas ═══════════════════ -->
+    <div
+      class="info-banner anim-slide-down"
+      *ngIf="selectedSongs.length > 0 && !showCheckboxes"
+      role="status"
+      aria-live="polite">
       <div class="banner-content">
-        <div class="icon-wrapper">
-          <ion-icon name="musical-notes"></ion-icon>
+        <div class="icon-wrapper pulse-icon">
+          <ion-icon name="musical-notes" aria-hidden="true"></ion-icon>
         </div>
         <div class="text-content">
           <h3>{{ selectedSongs.length }} canciones seleccionadas</h3>
@@ -42,11 +58,15 @@
       </div>
     </div>
 
-    <!-- Banner de Confirmación de Eliminación -->
-    <div class="danger-banner slide-in" *ngIf="showCheckboxes">
+    <!-- ══ Banner: Modo Eliminación ══════════════════════════ -->
+    <div
+      class="danger-banner anim-slide-down"
+      *ngIf="showCheckboxes"
+      role="alert"
+      aria-live="assertive">
       <div class="banner-content">
         <div class="icon-wrapper">
-          <ion-icon name="warning"></ion-icon>
+          <ion-icon name="warning" aria-hidden="true"></ion-icon>
         </div>
         <div class="text-content">
           <h3>Modo Eliminación</h3>
@@ -54,67 +74,115 @@
         </div>
       </div>
       <div class="banner-actions">
-        <button class="cancel-btn" (click)="cancelSelectedLists()">Cancelar</button>
-        <button class="confirm-btn" (click)="presentDeleteConfirm()">Eliminar</button>
+        <button
+          id="btn-cancel-delete"
+          class="cancel-btn"
+          (click)="cancelSelectedLists()"
+          aria-label="Cancelar eliminación">
+          Cancelar
+        </button>
+        <button
+          id="btn-confirm-delete"
+          class="confirm-btn"
+          (click)="presentDeleteConfirm()"
+          aria-label="Confirmar eliminación de listas seleccionadas">
+          Eliminar
+        </button>
       </div>
     </div>
 
-    <!-- Grid de Listas -->
-    <div class="lists-grid" *ngIf="filteredLists.length > 0; else emptyState">
-      <div 
-        class="list-card" 
-        *ngFor="let list of filteredLists; trackBy: trackById"
+    <!-- ══ SKELETON LOADERS — Mientras cargan ════════════════ -->
+    <div class="lists-grid" *ngIf="isLoading" aria-hidden="true" aria-label="Cargando listas...">
+      <div class="list-card skeleton-list-card" *ngFor="let i of [1,2,3,4,5,6]">
+        <div class="skeleton-card-top">
+          <div class="skeleton-circle" style="width:45px;height:45px;border-radius:12px;"></div>
+          <div class="skeleton-rect" style="width:44px;height:26px;border-radius:30px;"></div>
+        </div>
+        <div class="skeleton-line w-3/4 lg"></div>
+        <div class="skeleton-line w-1/2 sm"></div>
+        <div class="skeleton-line w-2/3" style="height:1px;background:var(--border-color);animation:none;"></div>
+        <div class="skeleton-line w-1/2 sm"></div>
+      </div>
+    </div>
+
+    <!-- ══ DATOS REALES — Grid de Listas ═════════════════════ -->
+    <div
+      class="lists-grid anim-fade-up"
+      *ngIf="!isLoading && filteredLists.length > 0"
+      role="list"
+      aria-label="Lista de repertorios semanales">
+      <div
+        class="list-card"
+        role="listitem"
+        *ngFor="let list of filteredLists; trackBy: trackById; let i = index"
         [class.selected-mode]="showCheckboxes"
         [class.active]="list.selected"
+        [attr.aria-selected]="showCheckboxes ? list.selected : null"
+        [attr.aria-label]="'Lista: ' + list.name"
+        [style.animation-delay]="i * 40 + 'ms'"
         (click)="showCheckboxes ? list.selected = !list.selected : openListPage(list.id)"
+        tabindex="0"
+        (keydown.enter)="showCheckboxes ? list.selected = !list.selected : openListPage(list.id)"
       >
-        <div class="card-status-strip" [class.active]="list.status"></div>
-        
+        <!-- Strip de estado -->
+        <div class="card-status-strip" [class.active]="list.status" aria-hidden="true"></div>
+
         <div class="card-content">
+          <!-- Header de la card -->
           <div class="card-header">
             <div class="icon-box">
-              <ion-icon name="list"></ion-icon>
+              <ion-icon name="list" aria-hidden="true"></ion-icon>
             </div>
+            <!-- Toggle status -->
             <div class="status-toggle" (click)="$event.stopPropagation()" *ngIf="!showCheckboxes">
-              <ion-toggle 
-                [checked]="list.status" 
+              <ion-toggle
+                [checked]="list.status"
                 (ionChange)="toggleStatus(list, $event)"
                 mode="ios"
-              ></ion-toggle>
+                [attr.aria-label]="'Lista ' + list.name + (list.status ? ' activa' : ' inactiva')">
+              </ion-toggle>
             </div>
+            <!-- Checkbox en modo eliminación -->
             <div class="checkbox-wrapper" *ngIf="showCheckboxes">
-              <ion-checkbox 
-                [(ngModel)]="list.selected" 
+              <ion-checkbox
+                [(ngModel)]="list.selected"
                 (click)="$event.stopPropagation()"
-              ></ion-checkbox>
+                [attr.aria-label]="'Seleccionar lista ' + list.name">
+              </ion-checkbox>
             </div>
           </div>
 
+          <!-- Body -->
           <div class="card-body">
-            <div class="list-name-container" style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
-              <h3 class="list-name" style="margin: 0;">{{ list.name }}</h3>
-              
-              <ion-button fill="clear" size="small" (click)="editList(list, $event)" *ngIf="!showCheckboxes" style="--padding-start: 4px; --padding-end: 4px; height: 24px;">
-                <ion-icon name="create-outline" style="font-size: 1.2rem;"></ion-icon>
+            <div class="list-name-container">
+              <h3 class="list-name">{{ list.name }}</h3>
+              <ion-button
+                fill="clear"
+                size="small"
+                class="edit-name-btn"
+                (click)="editList(list, $event)"
+                *ngIf="!showCheckboxes"
+                [attr.aria-label]="'Editar nombre de ' + list.name">
+                <ion-icon name="create-outline" aria-hidden="true"></ion-icon>
               </ion-button>
             </div>
-            <p class="song-count">
-              <ion-icon name="musical-note"></ion-icon>
+            <p class="song-count" [attr.aria-label]="(list.songs.length || 0) + ' canciones en esta lista'">
+              <ion-icon name="musical-note" aria-hidden="true"></ion-icon>
               {{ list.songs.length || 0 }} canciones
             </p>
           </div>
 
+          <!-- Footer -->
           <div class="card-footer">
             <span class="date-badge">
               {{ list.createdAt | date:'dd MMM yyyy' }}
             </span>
-            
-            <button 
-              class="add-songs-btn" 
+            <button
+              class="add-songs-btn"
               *ngIf="selectedSongs.length > 0 && !showCheckboxes"
               (click)="presentAddConfirm(list.id); $event.stopPropagation()"
-            >
-              <ion-icon name="add"></ion-icon>
+              [attr.aria-label]="'Añadir canciones a ' + list.name">
+              <ion-icon name="add" aria-hidden="true"></ion-icon>
               Añadir
             </button>
           </div>
@@ -122,18 +190,26 @@
       </div>
     </div>
 
-    <!-- Estado Vacío -->
-    <ng-template #emptyState>
-      <div class="empty-state">
-        <div class="empty-illustration">
-          <ion-icon name="albums-outline"></ion-icon>
-        </div>
-        <h2>No hay listas creadas</h2>
-        <p>Comienza creando tu primera lista de repertorio</p>
-        <button class="create-first-btn" (click)="openAddList()">
-          Crear Lista
-        </button>
+    <!-- ══ Estado Vacío ═══════════════════════════════════════ -->
+    <div
+      *ngIf="!isLoading && filteredLists.length === 0"
+      class="empty-state anim-bounce-in"
+      role="status"
+      aria-label="No hay listas creadas">
+      <div class="empty-illustration pulse-icon">
+        <ion-icon name="albums-outline" aria-hidden="true"></ion-icon>
       </div>
-    </ng-template>
+      <h2>No hay listas creadas</h2>
+      <p>Comienza creando tu primera lista de repertorio</p>
+      <button
+        id="btn-create-first-list"
+        class="create-first-btn"
+        (click)="openAddList()"
+        aria-label="Crear primera lista de repertorio">
+        <ion-icon name="add-circle-outline" aria-hidden="true"></ion-icon>
+        Crear Lista
+      </button>
+    </div>
+
   </div>
 </ion-content>

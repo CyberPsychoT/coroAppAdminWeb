@@ -1,4 +1,4 @@
-import { Component, OnDestroy } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { AuthService } from './services/auth.service';
 import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
@@ -9,13 +9,15 @@ import Swal from 'sweetalert2';
   templateUrl: 'app.component.html',
   styleUrls: ['app.component.scss'],
 })
-export class AppComponent implements OnDestroy {
+export class AppComponent implements OnInit, OnDestroy {
   public appPages = [
     { title: 'Canciones', url: '/admin/dashboard', icon: 'musical-notes' },
     { title: 'Lista semanal', url: '/admin/list-week', icon: 'calendar' },
   ];
+
   userName: string | null = null;
   userCargo: string | null = null;
+  isDarkMode = false;
 
   private userNameSubscription: Subscription;
 
@@ -28,20 +30,71 @@ export class AppComponent implements OnDestroy {
         this.userName = name;
       }
     );
-    
+
     this.authService.userCargo$.subscribe((cargo) => {
       this.userCargo = cargo;
     });
   }
 
-  // Cierre de sesión con SweetAlert2
+  ngOnInit() {
+    this.initTheme();
+  }
+
+  // ── Theme management ──────────────────────────────────────
+
+  /**
+   * Inicializa el tema:
+   * 1. Revisa si hay preferencia guardada en localStorage
+   * 2. Si no, usa la preferencia del sistema operativo
+   */
+  private initTheme() {
+    const savedTheme = localStorage.getItem('app-theme');
+
+    if (savedTheme) {
+      this.isDarkMode = savedTheme === 'dark';
+    } else {
+      // Detección automática del sistema
+      this.isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    }
+
+    this.applyTheme(this.isDarkMode);
+
+    // Escuchar cambios del sistema en tiempo real (solo si no hay preferencia guardada)
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+      if (!localStorage.getItem('app-theme')) {
+        this.isDarkMode = e.matches;
+        this.applyTheme(this.isDarkMode);
+      }
+    });
+  }
+
+  /** Aplica o quita la clase .dark-theme en el document.body */
+  private applyTheme(dark: boolean) {
+    if (dark) {
+      document.body.classList.add('dark-theme');
+      document.body.classList.remove('light-theme');
+    } else {
+      document.body.classList.add('light-theme');
+      document.body.classList.remove('dark-theme');
+    }
+  }
+
+  /** Toggle manual del usuario — persiste en localStorage */
+  toggleDarkMode() {
+    this.isDarkMode = !this.isDarkMode;
+    localStorage.setItem('app-theme', this.isDarkMode ? 'dark' : 'light');
+    this.applyTheme(this.isDarkMode);
+  }
+
+  // ── Logout ───────────────────────────────────────────────
+
   logouth() {
     Swal.fire({
       title: '¿Cerrar Sesión?',
-      text: "¿Estás seguro que deseas salir?",
+      text: '¿Estás seguro que deseas salir?',
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonColor: '#ff8c00', // Primary Orange
+      confirmButtonColor: '#ff8c00',
       cancelButtonColor: '#d33',
       confirmButtonText: 'Sí, salir',
       cancelButtonText: 'Cancelar',
@@ -53,7 +106,6 @@ export class AppComponent implements OnDestroy {
       if (result.isConfirmed) {
         this.authService.logout()
           .then(() => {
-            // Optional: Show goodbye message
             const Toast = Swal.mixin({
               toast: true,
               position: 'bottom',
@@ -61,8 +113,8 @@ export class AppComponent implements OnDestroy {
               timer: 2000,
               timerProgressBar: true,
               didOpen: (toast) => {
-                toast.addEventListener('mouseenter', Swal.stopTimer)
-                toast.addEventListener('mouseleave', Swal.resumeTimer)
+                toast.addEventListener('mouseenter', Swal.stopTimer);
+                toast.addEventListener('mouseleave', Swal.resumeTimer);
               }
             });
 

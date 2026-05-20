@@ -1,15 +1,18 @@
 <ion-app>
   <ion-split-pane contentId="main-content">
-    <!-- Menú Lateral -->
-    <ion-menu contentId="main-content" type="overlay" class="custom-menu">
+
+    <!-- ═══════════════════════════════════════════════
+         MENÚ LATERAL
+         ═══════════════════════════════════════════════ -->
+    <ion-menu contentId="main-content" type="overlay" class="custom-menu" role="navigation" aria-label="Navegación principal">
       <ion-content class="menu-content">
-        
-        <!-- Sección del Perfil de Usuario -->
+
+        <!-- Perfil de Usuario -->
         <div class="menu-header">
           <div class="profile-card">
             <div class="avatar-container">
-              <img alt="User Avatar" src="https://ionicframework.com/docs/img/demos/avatar.svg" />
-              <div class="status-indicator"></div>
+              <img alt="Avatar de usuario" src="https://ui-avatars.com/api/?name={{ userName || 'U' }}&background=random&color=fff&rounded=true&bold=true&uppercase=true&length=1" />
+              <div class="status-indicator" aria-label="En línea"></div>
             </div>
             <div class="user-info">
               <ion-title>{{ userName || 'Usuario' }}</ion-title>
@@ -18,50 +21,79 @@
           </div>
         </div>
 
-        <!-- Lista de Navegación Principal -->
-        <div class="menu-items-container">
-          <ion-list lines="none">
+        <!-- Navegación Principal -->
+        <nav class="menu-items-container">
+          <ion-list lines="none" role="list">
             <ion-menu-toggle auto-hide="false" *ngFor="let p of appPages; let i = index">
-              <ion-item 
-                [routerLink]="[p.url]" 
-                routerDirection="root" 
-                routerLinkActive="selected" 
+              <ion-item
+                [routerLink]="[p.url]"
+                routerDirection="root"
+                routerLinkActive="selected"
                 detail="false"
-                class="menu-item">
+                class="menu-item"
+                [id]="'nav-' + p.title.toLowerCase().replace(' ', '-')"
+                [attr.aria-label]="'Ir a ' + p.title"
+                role="listitem">
                 <div class="item-wrapper">
-                  <ion-icon [name]="p.icon" slot="start"></ion-icon>
+                  <div class="icon-wrap">
+                    <ion-icon [name]="p.icon" aria-hidden="true"></ion-icon>
+                  </div>
                   <ion-label>{{ p.title }}</ion-label>
                 </div>
-                <div class="active-indicator"></div>
+                <div class="active-indicator" aria-hidden="true"></div>
               </ion-item>
             </ion-menu-toggle>
 
-            <!-- Botón Actualizar APP -->
+            <!-- Actualizar APP -->
             <ion-menu-toggle auto-hide="false">
-              <ion-item 
-                routerLink="/admin/update-app" 
-                routerDirection="root" 
-                routerLinkActive="selected" 
+              <ion-item
+                routerLink="/admin/update-app"
+                routerDirection="root"
+                routerLinkActive="selected"
                 detail="false"
-                class="menu-item">
+                class="menu-item"
+                id="nav-update-app"
+                aria-label="Ir a Actualizar APP"
+                role="listitem">
                 <div class="item-wrapper">
-                  <ion-icon name="cloud-upload-outline" slot="start"></ion-icon>
+                  <div class="icon-wrap">
+                    <ion-icon name="cloud-upload-outline" aria-hidden="true"></ion-icon>
+                  </div>
                   <ion-label>Actualizar APP</ion-label>
                 </div>
-                <div class="active-indicator"></div>
+                <div class="active-indicator" aria-hidden="true"></div>
               </ion-item>
             </ion-menu-toggle>
           </ion-list>
-        </div>
+        </nav>
+
       </ion-content>
 
-      <!-- Footer del Menú con Botón de Logout -->
+      <!-- Footer: Logout + Toggle Tema -->
       <ion-footer class="menu-footer">
         <ion-toolbar>
-          <ion-button expand="block" class="logout-btn" (click)="logouth()">
-            <ion-icon slot="start" name="log-out-outline"></ion-icon>
+
+          <!-- Toggle Dark / Light Mode -->
+          <div class="theme-toggle" (click)="toggleDarkMode()" id="btn-toggle-theme" role="switch" [attr.aria-checked]="isDarkMode" aria-label="Cambiar modo oscuro/claro" tabindex="0" (keydown.enter)="toggleDarkMode()" (keydown.space)="toggleDarkMode()">
+            <div class="toggle-track">
+              <div class="toggle-thumb" [class.dark]="isDarkMode">
+                <ion-icon [name]="isDarkMode ? 'moon' : 'sunny'" class="theme-icon" aria-hidden="true"></ion-icon>
+              </div>
+            </div>
+            <span class="toggle-label">{{ isDarkMode ? 'Modo Oscuro' : 'Modo Claro' }}</span>
+          </div>
+
+          <!-- Logout -->
+          <ion-button
+            expand="block"
+            class="logout-btn"
+            id="btn-logout"
+            aria-label="Cerrar sesión"
+            (click)="logouth()">
+            <ion-icon slot="start" name="log-out-outline" aria-hidden="true"></ion-icon>
             <span>Cerrar Sesión</span>
           </ion-button>
+
         </ion-toolbar>
       </ion-footer>
     </ion-menu>

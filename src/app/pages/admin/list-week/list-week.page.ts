@@ -19,6 +19,7 @@ export class ListWeekPage implements OnInit {
   searchTerm: string = '';
   showCheckboxes: boolean = false;
   selectedSongs: string[] = [];
+  isLoading = true; // Skeleton loader flag
 
 
 
@@ -39,13 +40,13 @@ export class ListWeekPage implements OnInit {
 
     this.firestore.getLists().subscribe((lists) => {
       this.lists = lists.map(list => {
-        // Convertir Timestamp de Firestore a Date de JS si es necesario
         if (list.createdAt && (list.createdAt as any).toDate) {
           list.createdAt = (list.createdAt as any).toDate();
         }
         return list;
       }).sort((a, b) => a.name.localeCompare(b.name));
       this.filteredLists = this.lists;
+      this.isLoading = false;
     });
   }
 
@@ -295,11 +296,19 @@ export class ListWeekPage implements OnInit {
       });
   }
 
-  async presentToast(numSongs: number) {
+  async presentToast(numSongs: number, type: 'success' | 'error' | 'info' = 'success') {
+    const messages = {
+      success: `✓ ${numSongs} canción(es) añadidas a la lista`,
+      error: 'Ocurrió un error al añadir las canciones',
+      info: `${numSongs} canción(es) ya estaban en la lista`
+    };
     const toast = await this.toastController.create({
-      message: `Se agregaron ${numSongs} canción(es) a la lista.`,
-      duration: 2000,
+      message: messages[type],
+      duration: 3000,
+      position: 'bottom',
+      cssClass: `app-toast toast-${type}`,
+      buttons: [{ icon: 'close', role: 'cancel' }]
     });
-    toast.present();
+    await toast.present();
   }
 }

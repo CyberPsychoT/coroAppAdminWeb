@@ -1,75 +1,123 @@
 <ion-content [fullscreen]="true">
   <div class="dashboard-container">
-    <!-- Encabezado del Dashboard -->
-    <header class="dashboard-header">
+
+    <!-- ══ Encabezado ══════════════════════════════════════════ -->
+    <header class="dashboard-header" role="banner">
       <div class="header-content">
         <h1 class="page-title">Repertorio 🎼</h1>
-        <p class="subtitle">{{ filteredSongs.length }} canciones disponibles</p>
+        <p class="subtitle" aria-live="polite">
+          <ng-container *ngIf="!isLoading">{{ filteredSongs.length }} canciones disponibles</ng-container>
+          <span *ngIf="isLoading" class="skeleton-line w-1/2 sm"></span>
+        </p>
       </div>
-      
-      <div class="actions-toolbar">
+
+      <div class="actions-toolbar" role="search">
         <div class="search-wrapper">
-          <ion-icon name="search-outline"></ion-icon>
-          <input 
-            type="text" 
-            placeholder="Buscar canción..." 
-            [(ngModel)]="searchTerm" 
+          <ion-icon name="search-outline" aria-hidden="true"></ion-icon>
+          <input
+            id="search-songs"
+            type="search"
+            placeholder="Buscar canción..."
+            [(ngModel)]="searchTerm"
             (input)="filterSongs()"
+            aria-label="Buscar canción en el repertorio"
           >
         </div>
-        
-    <div class="action-buttons">
-          <button class="icon-btn add-btn" (click)="openAddSongModal()" title="Agregar Canción">
-            <ion-icon name="add"></ion-icon>
+
+        <div class="action-buttons" role="group" aria-label="Acciones del repertorio">
+          <button
+            id="btn-add-song"
+            class="icon-btn add-btn"
+            (click)="openAddSongModal()"
+            title="Agregar Canción"
+            aria-label="Agregar nueva canción">
+            <ion-icon name="add" aria-hidden="true"></ion-icon>
           </button>
-          <button class="icon-btn select-btn" (click)="toggleConfirmationButtons()" title="Seleccionar">
-            <ion-icon name="checkmark-circle-outline"></ion-icon>
+          <button
+            id="btn-select-songs"
+            class="icon-btn select-btn"
+            [class.active]="showConfirmationButtons"
+            (click)="toggleConfirmationButtons()"
+            title="Seleccionar canciones"
+            [attr.aria-pressed]="showConfirmationButtons"
+            aria-label="Activar modo selección">
+            <ion-icon name="checkmark-circle-outline" aria-hidden="true"></ion-icon>
           </button>
-          <button class="icon-btn list-btn" (click)="showLists()" title="Ver Listas">
-            <ion-icon name="list-outline"></ion-icon>
-            <!-- <ion-badge *ngIf="getSelectedCount() > 0" color="danger">{{ getSelectedCount() }}</ion-badge> -->
+          <button
+            id="btn-view-lists"
+            class="icon-btn list-btn"
+            (click)="showLists()"
+            title="Ver Listas"
+            aria-label="Ver listas de repertorio">
+            <ion-icon name="list-outline" aria-hidden="true"></ion-icon>
           </button>
         </div>
       </div>
     </header>
 
-    <!-- Barra de Acciones de Selección -->
-    <div class="confirmation-container" *ngIf="showConfirmationButtons">
-        <div class="confirm-content">
-          <p>Seleccionadas: {{ getSelectedCount() }}</p>
-        </div>
-        <div class="confirmation-buttons">
-            <button class="confirm-btn add-list" (click)="showLists()">
-                <ion-icon name="list-outline"></ion-icon>
-                Agregar
-            </button>
-            <button class="confirm-btn delete" (click)="presentDeleteConfirm()">
-                <ion-icon name="trash-outline"></ion-icon>
-                Eliminar
-            </button>
-            <button class="confirm-btn cancel" (click)="cancelSelectedSongs()">
-                <ion-icon name="close-outline"></ion-icon>
-            </button>
-        </div>
+    <!-- ══ Barra de Selección ══════════════════════════════════ -->
+    <div
+      class="confirmation-container anim-slide-down"
+      *ngIf="showConfirmationButtons"
+      role="toolbar"
+      aria-label="Barra de selección múltiple">
+      <div class="confirm-content">
+        <ion-icon name="musical-notes" aria-hidden="true"></ion-icon>
+        <p>Seleccionadas: <strong>{{ getSelectedCount() }}</strong></p>
+      </div>
+      <div class="confirmation-buttons">
+        <button id="btn-add-to-list" class="confirm-btn add-list" (click)="showLists()" aria-label="Agregar a lista">
+          <ion-icon name="list-outline" aria-hidden="true"></ion-icon>
+          Agregar
+        </button>
+        <button id="btn-delete-selected" class="confirm-btn delete" (click)="presentDeleteConfirm()" aria-label="Eliminar canciones seleccionadas">
+          <ion-icon name="trash-outline" aria-hidden="true"></ion-icon>
+          Eliminar
+        </button>
+        <button id="btn-cancel-selection" class="confirm-btn cancel" (click)="cancelSelectedSongs()" aria-label="Cancelar selección">
+          <ion-icon name="close-outline" aria-hidden="true"></ion-icon>
+        </button>
+      </div>
     </div>
 
-    <!-- Grid de Canciones -->
+    <!-- ══ Grid de Canciones ═══════════════════════════════════ -->
     <div class="songs-grid-container">
-      <div class="songs-grid" *ngIf="filteredSongs.length > 0">
-        <div 
-          class="song-card" 
-          *ngFor="let song of filteredSongs; trackBy: trackById"
+
+      <!-- SKELETON LOADERS — Mientras cargan -->
+      <div class="songs-grid" *ngIf="isLoading" aria-hidden="true" aria-label="Cargando canciones...">
+        <div class="song-card skeleton-song-card" *ngFor="let i of [1,2,3,4,5,6,7,8,9,10,11,12]">
+          <div class="skeleton-circle" style="width:50px;height:50px;"></div>
+          <div class="skeleton-line w-3/4 lg" style="margin-top:8px;"></div>
+          <div class="skeleton-line w-1/2 sm"></div>
+        </div>
+      </div>
+
+      <!-- DATOS REALES -->
+      <div
+        class="songs-grid anim-fade-up"
+        *ngIf="!isLoading && filteredSongs.length > 0"
+        role="list"
+        aria-label="Lista de canciones">
+        <div
+          class="song-card"
+          role="listitem"
+          *ngFor="let song of filteredSongs; trackBy: trackById; let i = index"
           [class.selected]="song.selected"
+          [attr.aria-selected]="showConfirmationButtons ? song.selected : null"
+          [attr.aria-label]="'Canción: ' + song.name"
+          [style.animation-delay]="i * 30 + 'ms'"
           (click)="showConfirmationButtons ? (song.selected = !song.selected) : openSongPage(song.id)"
+          tabindex="0"
+          (keydown.enter)="showConfirmationButtons ? (song.selected = !song.selected) : openSongPage(song.id)"
         >
           <div class="card-content">
             <div class="icon-box">
-              <ion-icon name="musical-note"></ion-icon>
+              <ion-icon name="musical-note" aria-hidden="true"></ion-icon>
             </div>
             <h3 class="song-title">{{ song.name }}</h3>
-            
-            <!-- Checkbox overlay for selection mode -->
-            <div class="selection-overlay" *ngIf="showConfirmationButtons">
+
+            <!-- Checkbox en modo selección -->
+            <div class="selection-overlay" *ngIf="showConfirmationButtons" aria-hidden="true">
               <div class="checkbox" [class.checked]="song.selected">
                 <ion-icon name="checkmark" *ngIf="song.selected"></ion-icon>
               </div>
@@ -77,15 +125,28 @@
           </div>
         </div>
       </div>
-      
-      <!-- Estado Vacío -->
-      <div *ngIf="filteredSongs.length === 0" class="empty-state">
-          <div class="empty-icon">
-            <ion-icon name="musical-notes-outline"></ion-icon>
-          </div>
-          <h3>No se encontraron canciones</h3>
-          <p>Intenta con otra búsqueda o agrega una nueva canción al repertorio.</p>
+
+      <!-- ESTADO VACÍO -->
+      <div
+        *ngIf="!isLoading && filteredSongs.length === 0"
+        class="empty-state anim-bounce-in"
+        role="status"
+        aria-label="No se encontraron canciones">
+        <div class="empty-icon pulse-icon">
+          <ion-icon name="musical-notes-outline" aria-hidden="true"></ion-icon>
+        </div>
+        <h3>No se encontraron canciones</h3>
+        <p>Intenta con otra búsqueda o agrega una nueva canción al repertorio.</p>
+        <button
+          id="btn-add-first-song"
+          class="empty-action-btn"
+          (click)="openAddSongModal()"
+          aria-label="Agregar primera canción">
+          <ion-icon name="add-circle-outline" aria-hidden="true"></ion-icon>
+          Agregar canción
+        </button>
       </div>
     </div>
+
   </div>
 </ion-content>

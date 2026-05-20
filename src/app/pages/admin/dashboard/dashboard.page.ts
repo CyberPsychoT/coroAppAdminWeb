@@ -14,11 +14,12 @@ import Swal from 'sweetalert2';
   styleUrls: ['./dashboard.page.scss'],
 })
 export class DashboardPage implements OnInit {
-  songs: any[] = []; // Inicializa aquí para evitar errores similares
-  filteredSongs: any[] = []; // Inicializado como un arreglo vacío
+  songs: any[] = [];
+  filteredSongs: any[] = [];
   searchTerm: string = '';
   selectedSongs: string[] = [];
-  showConfirmationButtons = false; // Controla la visibilidad de los botones de confirmar y volver
+  showConfirmationButtons = false;
+  isLoading = true; // Skeleton loader flag
 
   constructor(
     private router: Router,
@@ -27,24 +28,13 @@ export class DashboardPage implements OnInit {
     private alertController: AlertController,
     private firestore: FirestoreService,
     private fireStore: Firestore
-  ) {
-    this.songs = [
-      {
-        name: '',
-        introduction: '',
-        letter1: '',
-        interlude: '',
-        letter2: '',
-        end: '',
-        label: '',
-      },
-    ];
-  }
+  ) {}
 
   ngOnInit() {
     this.firestore.getSongs().subscribe((songs) => {
       this.songs = songs.sort((a, b) => a.name.localeCompare(b.name));
       this.filteredSongs = this.songs;
+      this.isLoading = false;
     });
   }
 

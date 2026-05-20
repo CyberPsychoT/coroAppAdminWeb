@@ -1,167 +1,194 @@
-// Variables locales (Light Theme)
-$bg-light: #f4f5f8;
-$card-bg: #ffffff;
-$text-primary: #1c1e21;
-$text-secondary: #606770;
-$border-color: #e0e0e0;
+/* ─── Dashboard Page — Canciones ─── */
 
+// ── Base ─────────────────────────────────────────
 ion-content {
-  --background: #{$bg-light};
+  --background: var(--app-bg);
 }
 
 .dashboard-container {
   min-height: 100%;
-  background-color: $bg-light;
-  font-family: 'Poppins', sans-serif;
+  background-color: var(--app-bg);
+  font-family: var(--font-family);
+  padding-bottom: var(--space-12, 48px);
 }
 
-// --- Header ---
+// ── Header ───────────────────────────────────────
 .dashboard-header {
-  background: rgba(255, 255, 255, 0.9);
-  backdrop-filter: blur(10px);
-  padding: 20px 24px;
+  background: var(--surface-overlay);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  padding: var(--space-5, 20px) var(--space-5, 20px);
   position: sticky;
   top: 0;
-  z-index: 100;
-  border-bottom: 1px solid $border-color;
+  z-index: var(--z-sticky, 200);
+  border-bottom: 1px solid var(--border-color);
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: var(--space-4, 16px);
+  animation: fade-slide-up var(--transition-slow, 400ms) ease both;
 
   @media (min-width: 768px) {
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
+    padding: var(--space-5) var(--space-6, 24px);
   }
 
   .header-content {
     .page-title {
-      font-size: 1.8rem;
-      font-weight: 700;
-      color: $text-primary;
+      font-size: var(--font-size-2xl, 1.5rem);
+      font-weight: 800;
+      color: var(--text-primary);
       margin: 0;
       letter-spacing: -0.5px;
+      line-height: 1.2;
+
+      @media (min-width: 768px) {
+        font-size: var(--font-size-3xl, 1.875rem);
+      }
     }
 
     .subtitle {
       color: var(--ion-color-primary);
-      font-size: 0.9rem;
-      margin: 5px 0 0;
-      font-weight: 500;
+      font-size: var(--font-size-sm, 0.875rem);
+      margin: 4px 0 0;
+      font-weight: 600;
+      min-height: 20px;
+      display: flex;
+      align-items: center;
     }
   }
 }
 
-// --- Toolbar (Search & Actions) ---
+// ── Toolbar ──────────────────────────────────────
 .actions-toolbar {
   display: flex;
-  gap: 15px;
+  gap: var(--space-3, 12px);
   align-items: center;
   width: 100%;
 
   @media (min-width: 768px) {
     width: auto;
+    min-width: 360px;
   }
 
   .search-wrapper {
     flex: 1;
-    background: $card-bg;
-    border-radius: 12px;
-    padding: 0 15px;
+    background: var(--surface-1);
+    border-radius: var(--radius-md, 12px);
+    padding: 0 var(--space-4, 16px);
     display: flex;
     align-items: center;
-    height: 45px;
-    border: 1px solid $border-color;
-    transition: all 0.3s ease;
-    min-width: 200px;
+    height: 46px;
+    border: 1.5px solid var(--border-color);
+    transition: all var(--transition-base);
+    min-width: 0;
+    gap: var(--space-2, 8px);
 
     &:focus-within {
       border-color: var(--ion-color-primary);
-      box-shadow: 0 0 0 2px rgba(var(--ion-color-primary-rgb), 0.2);
+      box-shadow: 0 0 0 3px rgba(var(--ion-color-primary-rgb), 0.15);
+      background: var(--surface-2);
     }
 
     ion-icon {
-      color: $text-secondary;
-      font-size: 1.2rem;
-      margin-right: 10px;
+      color: var(--text-tertiary);
+      font-size: 1.1rem;
+      flex-shrink: 0;
     }
 
     input {
       background: transparent;
       border: none;
       outline: none;
-      color: $text-primary;
+      color: var(--text-primary);
       width: 100%;
-      font-size: 0.95rem;
+      font-size: var(--font-size-sm);
       font-family: inherit;
 
-      &::placeholder {
-        color: $text-secondary;
-      }
+      &::placeholder { color: var(--text-tertiary); }
     }
   }
 
   .action-buttons {
     display: flex;
-    gap: 10px;
+    gap: var(--space-2, 8px);
+    flex-shrink: 0;
 
     .icon-btn {
-      width: 45px;
-      height: 45px;
-      border-radius: 12px;
+      width: 46px;
+      height: 46px;
+      border-radius: var(--radius-md, 12px);
       border: none;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      transition: all 0.2s ease;
-      font-size: 1.3rem;
+      transition: all var(--transition-base);
+      font-size: 1.25rem;
+
+      &:focus-visible {
+        outline: 2px solid var(--ion-color-primary);
+        outline-offset: 2px;
+      }
 
       &.add-btn {
         background: var(--ion-color-primary);
         color: white;
-        box-shadow: 0 4px 12px rgba(var(--ion-color-primary-rgb), 0.3);
+        box-shadow: var(--shadow-primary);
 
         &:hover {
           background: var(--ion-color-primary-shade);
           transform: translateY(-2px);
+          box-shadow: var(--shadow-primary-hover);
         }
+        &:active { transform: translateY(0); }
       }
 
       &.select-btn {
-        background: rgba(var(--ion-color-primary-rgb), 0.1);
-        color: var(--ion-color-primary);
+        background: var(--surface-3);
+        color: var(--text-secondary);
+        border: 1.5px solid var(--border-color);
 
         &:hover {
-          background: rgba(var(--ion-color-primary-rgb), 0.2);
+          background: rgba(var(--ion-color-primary-rgb), 0.1);
+          color: var(--ion-color-primary);
+          border-color: rgba(var(--ion-color-primary-rgb), 0.3);
+        }
+
+        &.active {
+          background: rgba(var(--ion-color-primary-rgb), 0.12);
+          color: var(--ion-color-primary);
+          border-color: rgba(var(--ion-color-primary-rgb), 0.4);
         }
       }
 
       &.list-btn {
-        background: rgba(255, 255, 255, 0.05);
-        color: $text-primary;
+        background: var(--surface-3);
+        color: var(--text-secondary);
+        border: 1.5px solid var(--border-color);
 
         &:hover {
-          background: rgba(255, 255, 255, 0.1);
+          background: var(--surface-2);
+          color: var(--text-primary);
         }
       }
     }
   }
 }
 
-// --- Confirmation Banner ---
+// ── Confirmation Banner ───────────────────────────
 .confirmation-container {
-  background: rgba(255, 69, 0, 0.1);
-  border: 1px solid rgba(255, 69, 0, 0.2);
-  margin: 20px 24px 0;
-  border-radius: 12px;
-  padding: 15px 20px;
+  background: rgba(var(--ion-color-secondary-rgb), 0.07);
+  border: 1.5px solid rgba(var(--ion-color-secondary-rgb), 0.18);
+  margin: var(--space-4, 16px) var(--space-5, 20px) 0;
+  border-radius: var(--radius-lg, 16px);
+  padding: var(--space-4, 16px) var(--space-5, 20px);
   display: flex;
   flex-direction: column;
-  gap: 15px;
-  animation: slideDown 0.3s ease-out;
+  gap: var(--space-4, 16px);
 
-  @media (min-width: 768px) {
+  @media (min-width: 600px) {
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
@@ -170,132 +197,130 @@ ion-content {
   .confirm-content {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: var(--space-3, 12px);
     color: var(--ion-color-secondary);
+    font-weight: 600;
+    font-size: var(--font-size-sm);
 
-    .warning-icon {
-      font-size: 1.5rem;
-    }
-
-    p {
-      margin: 0;
-      font-weight: 500;
-    }
+    ion-icon { font-size: 1.4rem; }
+    p { margin: 0; }
   }
 
   .confirmation-buttons {
     display: flex;
-    gap: 10px;
+    gap: var(--space-2, 8px);
+    flex-wrap: wrap;
 
     .confirm-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
       padding: 8px 16px;
-      border-radius: 8px;
+      border-radius: var(--radius-sm, 8px);
       border: none;
       font-weight: 600;
+      font-size: var(--font-size-sm);
       cursor: pointer;
       font-family: inherit;
-      transition: all 0.2s;
+      transition: all var(--transition-base);
 
       &.add-list {
         background: var(--ion-color-primary);
         color: white;
-
-        &:hover {
-          background: var(--ion-color-primary-shade);
-        }
+        box-shadow: var(--shadow-primary);
+        &:hover { background: var(--ion-color-primary-shade); transform: translateY(-1px); }
       }
 
       &.delete {
         background: var(--ion-color-secondary);
         color: white;
-
-        &:hover {
-          background: var(--ion-color-secondary-shade);
-        }
+        &:hover { background: var(--ion-color-secondary-shade); transform: translateY(-1px); }
       }
 
       &.cancel {
-        background: transparent;
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        color: $text-secondary;
-
-        &:hover {
-          border-color: $text-secondary;
-          color: $text-primary;
-        }
+        background: var(--surface-3);
+        color: var(--text-secondary);
+        border: 1.5px solid var(--border-color);
+        padding: 8px 12px;
+        &:hover { background: var(--surface-2); color: var(--text-primary); }
       }
     }
   }
 }
 
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
+// ── Songs Grid ───────────────────────────────────
 .songs-grid-container {
-  padding: 24px;
+  padding: var(--space-5, 20px);
+
+  @media (min-width: 768px) {
+    padding: var(--space-6, 24px);
+  }
 }
 
 .songs-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-4, 16px);
+
+  @media (min-width: 480px) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  @media (min-width: 768px) {
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--space-5, 20px);
+  }
+  @media (min-width: 1024px) {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  }
 }
 
+// ── Song Card ─────────────────────────────────────
 .song-card {
-  background: $card-bg;
-  border-radius: 16px;
+  background: var(--surface-1);
+  border-radius: var(--radius-lg, 16px);
   position: relative;
   overflow: hidden;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  border: 1px solid transparent;
-  animation: scaleIn 0.4s ease-out backwards;
-  
-  // Staggered animation
-  @for $i from 1 through 100 {
-    &:nth-child(#{$i}) {
-      animation-delay: #{$i * 0.03}s;
-    }
+  transition: all var(--transition-base);
+  border: 1.5px solid var(--border-color);
+  box-shadow: var(--shadow-xs);
+  animation: scale-in var(--transition-slow, 400ms) ease both;
+
+  // Focus accesible
+  &:focus-visible {
+    outline: 2px solid var(--ion-color-primary);
+    outline-offset: 2px;
   }
 
   .card-content {
-    padding: 20px;
+    padding: var(--space-5, 20px) var(--space-4, 16px);
     display: flex;
     flex-direction: column;
     align-items: center;
     text-align: center;
-    height: 100%;
-    
+    gap: var(--space-3, 12px);
+
     .icon-box {
-      width: 50px;
-      height: 50px;
-      border-radius: 50%;
-      background: rgba(255, 140, 0, 0.1);
+      width: 52px;
+      height: 52px;
+      border-radius: var(--radius-full);
+      background: rgba(var(--ion-color-primary-rgb), 0.1);
       display: flex;
       align-items: center;
       justify-content: center;
-      margin-bottom: 15px;
-      transition: all 0.3s ease;
-      
+      transition: all var(--transition-base);
+
       ion-icon {
         font-size: 24px;
         color: var(--ion-color-primary);
+        transition: all var(--transition-base);
       }
     }
-    
+
     .song-title {
-      font-size: 1rem;
+      font-size: var(--font-size-sm, 0.875rem);
       font-weight: 600;
-      color: $text-primary;
+      color: var(--text-primary);
       margin: 0;
       line-height: 1.4;
       display: -webkit-box;
@@ -303,100 +328,123 @@ ion-content {
       line-clamp: 2;
       -webkit-box-orient: vertical;
       overflow: hidden;
+      word-break: break-word;
     }
   }
-  
-  // Hover Effect
+
+  // Hover
   &:hover {
-    transform: translateY(-5px);
-    background: lighten($card-bg, 3%);
-    box-shadow: 0 10px 20px rgba(0,0,0,0.2);
-    
+    transform: translateY(-4px);
+    border-color: rgba(var(--ion-color-primary-rgb), 0.3);
+    box-shadow: var(--shadow-md), var(--shadow-primary);
+
     .icon-box {
       background: var(--ion-color-primary);
-      
-      ion-icon {
-        color: white;
-      }
+      transform: scale(1.08) rotate(-4deg);
+
+      ion-icon { color: white; }
     }
   }
-  
-  // Selection Mode
+
+  &:active { transform: translateY(-1px); }
+
+  // Selection overlay
   .selection-overlay {
     position: absolute;
-    top: 10px;
-    right: 10px;
+    top: var(--space-2, 8px);
+    right: var(--space-2, 8px);
     z-index: 2;
-    
+
     .checkbox {
       width: 24px;
       height: 24px;
       border-radius: 6px;
-      border: 2px solid $text-secondary;
-      background: $card-bg;
+      border: 2px solid var(--border-color);
+      background: var(--surface-1);
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: all 0.2s;
-      
+      transition: all var(--transition-fast);
+
       &.checked {
         background: var(--ion-color-primary);
         border-color: var(--ion-color-primary);
-        
-        ion-icon {
-          color: white;
-          font-size: 16px;
-        }
+        box-shadow: var(--shadow-primary);
+
+        ion-icon { color: white; font-size: 14px; }
       }
     }
   }
-  
+
+  // Selected card
   &.selected {
     border-color: var(--ion-color-primary);
-    background: rgba(255, 140, 0, 0.05);
+    background: rgba(var(--ion-color-primary-rgb), 0.04);
+    box-shadow: 0 0 0 1px rgba(var(--ion-color-primary-rgb), 0.2);
   }
 }
 
-@keyframes scaleIn {
-  from { opacity: 0; transform: scale(0.9); }
-  to { opacity: 1; transform: scale(1); }
-}
-
-// --- Empty State ---
+// ── Empty State ───────────────────────────────────
 .empty-state {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 60px 20px;
+  padding: var(--space-12, 48px) var(--space-5, 20px);
   text-align: center;
-  
+
   .empty-icon {
     width: 100px;
     height: 100px;
-    background: $card-bg;
-    border-radius: 50%;
+    background: var(--surface-2);
+    border-radius: var(--radius-full);
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-bottom: 20px;
-    
+    margin-bottom: var(--space-6, 24px);
+    border: 2px dashed var(--border-color);
+
     ion-icon {
-      font-size: 50px;
-      color: $text-secondary;
-      opacity: 0.5;
+      font-size: 48px;
+      color: var(--text-tertiary);
     }
   }
-  
+
   h3 {
-    color: $text-primary;
-    font-size: 1.5rem;
-    margin: 0 0 10px;
+    color: var(--text-primary);
+    font-size: var(--font-size-xl, 1.25rem);
+    font-weight: 700;
+    margin: 0 0 var(--space-2, 8px);
   }
-  
+
   p {
-    color: $text-secondary;
-    max-width: 300px;
-    margin: 0;
+    color: var(--text-secondary);
+    max-width: 280px;
+    margin: 0 0 var(--space-6, 24px);
+    font-size: var(--font-size-sm);
+    line-height: 1.6;
+  }
+
+  .empty-action-btn {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2, 8px);
+    padding: 10px 24px;
+    background: var(--ion-color-primary);
+    color: white;
+    border: none;
+    border-radius: var(--radius-full);
+    font-weight: 600;
+    font-size: var(--font-size-sm);
+    font-family: inherit;
+    cursor: pointer;
+    box-shadow: var(--shadow-primary);
+    transition: all var(--transition-base);
+
+    &:hover {
+      background: var(--ion-color-primary-shade);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-primary-hover);
+    }
   }
 }
