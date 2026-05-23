@@ -136,6 +136,7 @@ export class SongPage implements OnInit {
         return;
       }
 
+      let hasChords = line.includes('[');
       let parsedLine = line.replace(/\[(.*?)\]([^\[]*)/g, (match, chord, lyric) => {
         return `<span class="chord-wrapper"><span class="chord">${chord}</span><span class="lyric">${lyric.replace(/ /g, '&nbsp;')}</span></span>`;
       });
@@ -145,7 +146,7 @@ export class SongPage implements OnInit {
         parsedLine = `<span class="lyric">${firstPart.replace(/ /g, '&nbsp;')}</span>` + parsedLine.substring(firstPart.length);
       }
 
-      htmlOutput += `<div class="lyric-line">${parsedLine}</div>`;
+      htmlOutput += `<div class="lyric-line ${hasChords ? 'has-chords' : ''}">${parsedLine}</div>`;
     });
 
     return this.sanitizer.bypassSecurityTrustHtml(htmlOutput);

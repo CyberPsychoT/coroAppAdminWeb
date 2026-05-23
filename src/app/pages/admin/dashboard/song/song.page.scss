@@ -160,24 +160,29 @@ ion-content {
 
         ::ng-deep {
           .lyric-line {
-            line-height: 2.5;
-            margin-bottom: 10px;
+            line-height: 1.5;
+            margin-bottom: 4px;
             white-space: normal;
+            
+            &.has-chords {
+              margin-top: 1.5em; /* Solo las líneas con acordes empujan el contenido hacia abajo */
+            }
           }
 
           .chord-wrapper {
-            display: inline-flex;
-            flex-direction: column;
-            align-items: flex-start;
-            vertical-align: bottom;
-            margin-right: 2px;
+            position: relative;
+            display: inline-block;
+            margin-right: 0; /* Sin margen, el espaciado lo da la letra original */
           }
 
           .chord {
+            position: absolute;
+            bottom: 90%; /* Flota sobre la sílaba */
+            left: 0;
             font-weight: 800;
             color: var(--ion-color-primary);
             font-size: 0.9em;
-            margin-bottom: -10px;
+            white-space: nowrap; /* Evita que el acorde se rompa en varias líneas */
           }
 
           .lyric {

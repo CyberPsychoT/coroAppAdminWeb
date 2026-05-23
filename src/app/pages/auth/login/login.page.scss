@@ -76,12 +76,12 @@ ion-content {
   width: 900px;
   max-width: 90%;
   height: 600px;
-  background: rgba(255, 255, 255, 0.7);
+  background: var(--surface-overlay, rgba(255, 255, 255, 0.7));
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-radius: 24px;
-  box-shadow: var(--card-shadow);
-  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: var(--card-shadow, var(--shadow-lg));
+  border: 1px solid var(--border-color);
   overflow: hidden;
   animation: scaleIn 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
@@ -165,7 +165,7 @@ ion-content {
   align-items: center;
   justify-content: center;
   padding: 40px;
-  background: var(--card-background);
+  background: transparent;
 
   .form-content {
     width: 100%;
@@ -186,12 +186,12 @@ ion-content {
   h3 {
     font-size: 2rem;
     font-weight: 700;
-    color: var(--text-color-primary);
+    color: var(--text-primary);
     margin: 0 0 10px;
   }
 
   p {
-    color: var(--text-color-secondary);
+    color: var(--text-secondary);
     font-size: 1rem;
   }
 }
@@ -202,7 +202,7 @@ ion-content {
 }
 
 .custom-input {
-  --background: #f4f6f8;
+  --background: var(--surface-2);
   --padding-start: 15px;
   --inner-padding-end: 15px;
   border-radius: 12px;
@@ -211,21 +211,21 @@ ion-content {
   border: 1px solid transparent;
 
   &:focus-within {
-    --background: var(--card-background);
+    --background: var(--surface-1);
     border-color: var(--ion-color-primary);
     box-shadow: 0 4px 12px rgba(var(--ion-color-primary-rgb), 0.15);
     transform: translateY(-2px);
   }
 
   ion-icon {
-    color: #b2bec3;
+    color: var(--text-tertiary);
     margin-right: 10px;
     font-size: 1.2rem;
   }
 
   ion-input {
-    --placeholder-color: #b2bec3;
-    --color: var(--text-color-primary);
+    --placeholder-color: var(--text-tertiary);
+    --color: var(--text-primary);
     font-size: 1rem;
     font-weight: 500;
   }
@@ -256,7 +256,7 @@ ion-content {
   text-align: center;
   
   a {
-    color: var(--text-color-secondary);
+    color: var(--text-secondary);
     text-decoration: none;
     font-size: 0.9rem;
     transition: color 0.3s;
@@ -278,7 +278,7 @@ ion-content {
     max-width: 100%;
     border-radius: 0;
     border: none;
-    background: rgba(255, 255, 255, 0.85);
+    background: var(--surface-overlay, rgba(255, 255, 255, 0.85));
   }
 
   .brand-panel {
@@ -309,12 +309,12 @@ ion-content {
   font-family: inherit !important;
   
   .swal2-title {
-    color: var(--text-color-primary) !important;
+    color: var(--text-primary) !important;
     font-size: 1.5rem !important;
   }
   
   .swal2-html-container {
-    color: var(--text-color-secondary) !important;
+    color: var(--text-secondary) !important;
   }
   
   // Ajustar el botón de confirmación de SweetAlert para que coincida con el tema
