@@ -4,9 +4,9 @@ import { FirestoreService } from 'src/app/services/firestore.service';
 import { List } from 'src/app/interfaces/list';
 import { Song } from 'src/app/interfaces/song';
 import { ListSong } from 'src/app/interfaces/list-song';
-import { NavController } from '@ionic/angular';
+import { NavController, ToastController } from '@ionic/angular';
 import { Subscription } from 'rxjs';
-import { switchMap, debounceTime, map, tap } from 'rxjs/operators';
+import { switchMap, first, map, tap } from 'rxjs/operators';
 import { Location } from '@angular/common';
 
 @Component({
@@ -19,11 +19,20 @@ export class ListPage implements OnInit, OnDestroy {
   private routeSub!: Subscription;
   sections: any[] = [];
 
+  // ── Modal: Agregar canciones ──────────────────────
+  showSongsModal = false;
+  allSongs: any[] = [];
+  filteredModalSongs: any[] = [];
+  songSearchTerm = '';
+  isLoadingSongs = false;
+  private songsSub?: Subscription;
+
   constructor(
     private activatedRoute: ActivatedRoute,
     private navCtrl: NavController,
     private location: Location,
-    private firestoreService: FirestoreService
+    private firestoreService: FirestoreService,
+    private toastController: ToastController
   ) { }
 
   ngOnInit() {
@@ -40,9 +49,8 @@ export class ListPage implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    if (this.routeSub) {
-      this.routeSub.unsubscribe();
-    }
+    if (this.routeSub) this.routeSub.unsubscribe();
+    this.songsSub?.unsubscribe();
   }
 
   initializeAndLoadSongs(listSongs: ListSong[]) {
@@ -82,7 +90,6 @@ export class ListPage implements OnInit, OnDestroy {
   assignSongToSection(songId: string, newSectionName: string) {
     if (!this.list || !this.list.id) return;
 
-    // Actualiza la UI primero para una respuesta instantánea
     let songToMove: any;
     this.sections.forEach(oldSection => {
       const songIndex = oldSection.songs.findIndex((s: Song) => s.id === songId);
@@ -94,12 +101,9 @@ export class ListPage implements OnInit, OnDestroy {
     if (songToMove) {
       songToMove.section = newSectionName;
       const newSection = this.sections.find(sec => sec.name === newSectionName);
-      if (newSection) {
-        newSection.songs.push(songToMove);
-      }
+      if (newSection) newSection.songs.push(songToMove);
     }
 
-    // Actualiza Firestore en segundo plano
     const listSongIndex = this.list.songs.findIndex(ls => ls.songId === songId);
     if (listSongIndex > -1) {
       this.list.songs[listSongIndex].section = newSectionName;
@@ -109,11 +113,9 @@ export class ListPage implements OnInit, OnDestroy {
 
   hideSong(songId: string) {
     if (this.list && this.list.id) {
-      // Elimina de la UI
       this.sections.forEach(section => {
         section.songs = section.songs.filter((s: Song) => s.id !== songId);
       });
-      // Elimina de la lista local y actualiza Firestore
       this.list.songs = this.list.songs.filter(ls => ls.songId !== songId);
       this.firestoreService.updateList(this.list.id, { songs: this.list.songs });
     }
@@ -133,6 +135,96 @@ export class ListPage implements OnInit, OnDestroy {
     this.location.back();
   }
 
+  // ── Modal: Agregar canciones desde lista ──────────
+  openAddSongsModal() {
+    this.showSongsModal = true;
+    this.songSearchTerm = '';
+    this.isLoadingSongs = true;
+
+    this.songsSub?.unsubscribe();
+    this.songsSub = this.firestoreService.getSongs().pipe(first()).subscribe((songs) => {
+      this.allSongs = songs
+        .sort((a, b) => a.name.localeCompare(b.name))
+        .map(s => ({ ...s, modalSelected: false }));
+      this.filteredModalSongs = this.allSongs;
+      this.isLoadingSongs = false;
+    });
+  }
+
+  closeAddSongsModal() {
+    this.showSongsModal = false;
+    this.songSearchTerm = '';
+    // Limpiar selección del modal
+    this.allSongs.forEach(s => (s.modalSelected = false));
+    this.filteredModalSongs = [];
+  }
+
+  normalizeText(text: string): string {
+    return text
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9\s]/gi, '')
+      .toLowerCase();
+  }
+
+  filterModalSongs() {
+    const term = this.normalizeText(this.songSearchTerm || '');
+    this.filteredModalSongs = term
+      ? this.allSongs.filter(s => this.normalizeText(s.name).includes(term))
+      : this.allSongs;
+  }
+
+  isSongInList(songId: string): boolean {
+    return this.list?.songs?.some(ls => ls.songId === songId) ?? false;
+  }
+
+  toggleModalSong(song: any) {
+    if (this.isSongInList(song.id)) return; // No se puede seleccionar si ya está
+    song.modalSelected = !song.modalSelected;
+  }
+
+  getModalSelectedCount(): number {
+    return this.allSongs.filter(s => s.modalSelected).length;
+  }
+
+  async confirmAddSongs() {
+    if (!this.list || !this.list.id) return;
+
+    const selected = this.allSongs.filter(s => s.modalSelected);
+    if (selected.length === 0) return;
+
+    const songsToAdd: ListSong[] = selected
+      .filter(s => !this.isSongInList(s.id))
+      .map(s => ({ songId: s.id, section: 'Todas las Canciones' }));
+
+    if (songsToAdd.length === 0) {
+      this.closeAddSongsModal();
+      return;
+    }
+
+    const updatedSongs = [...(this.list.songs || []), ...songsToAdd];
+
+    try {
+      await this.firestoreService.updateSongsInList(this.list.id, updatedSongs);
+      this.closeAddSongsModal();
+      this.presentToast(`✓ ${songsToAdd.length} canción${songsToAdd.length !== 1 ? 'es' : ''} añadida${songsToAdd.length !== 1 ? 's' : ''} correctamente`, 'success');
+    } catch (error) {
+      console.error('Error adding songs:', error);
+      this.presentToast('Error al añadir las canciones', 'error');
+    }
+  }
+
+  async presentToast(message: string, type: 'success' | 'error' = 'success') {
+    const toast = await this.toastController.create({
+      message,
+      duration: 3500,
+      position: 'bottom',
+      cssClass: `app-toast toast-${type}`,
+      buttons: [{ icon: 'close', role: 'cancel' }]
+    });
+    await toast.present();
+  }
+
   trackBySectionName(index: number, section: any): string {
     return section.name;
   }
@@ -140,5 +232,4 @@ export class ListPage implements OnInit, OnDestroy {
   trackBySongId(index: number, song: Song): string {
     return song.id ?? '';
   }
-
 }

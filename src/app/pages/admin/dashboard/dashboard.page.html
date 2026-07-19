@@ -34,19 +34,9 @@
             <ion-icon name="add" aria-hidden="true"></ion-icon>
           </button>
           <button
-            id="btn-select-songs"
-            class="icon-btn select-btn"
-            [class.active]="showConfirmationButtons"
-            (click)="toggleConfirmationButtons()"
-            title="Seleccionar canciones"
-            [attr.aria-pressed]="showConfirmationButtons"
-            aria-label="Activar modo selección">
-            <ion-icon name="checkmark-circle-outline" aria-hidden="true"></ion-icon>
-          </button>
-          <button
             id="btn-view-lists"
             class="icon-btn list-btn"
-            (click)="showLists()"
+            (click)="goToLists()"
             title="Ver Listas"
             aria-label="Ver listas de repertorio">
             <ion-icon name="list-outline" aria-hidden="true"></ion-icon>
@@ -55,29 +45,10 @@
       </div>
     </header>
 
-    <!-- ══ Barra de Selección ══════════════════════════════════ -->
-    <div
-      class="confirmation-container anim-slide-down"
-      *ngIf="showConfirmationButtons"
-      role="toolbar"
-      aria-label="Barra de selección múltiple">
-      <div class="confirm-content">
-        <ion-icon name="musical-notes" aria-hidden="true"></ion-icon>
-        <p>Seleccionadas: <strong>{{ getSelectedCount() }}</strong></p>
-      </div>
-      <div class="confirmation-buttons">
-        <button id="btn-add-to-list" class="confirm-btn add-list" (click)="showLists()" aria-label="Agregar a lista">
-          <ion-icon name="list-outline" aria-hidden="true"></ion-icon>
-          Agregar
-        </button>
-        <button id="btn-delete-selected" class="confirm-btn delete" (click)="presentDeleteConfirm()" aria-label="Eliminar canciones seleccionadas">
-          <ion-icon name="trash-outline" aria-hidden="true"></ion-icon>
-          Eliminar
-        </button>
-        <button id="btn-cancel-selection" class="confirm-btn cancel" (click)="cancelSelectedSongs()" aria-label="Cancelar selección">
-          <ion-icon name="close-outline" aria-hidden="true"></ion-icon>
-        </button>
-      </div>
+    <!-- ══ Hint: long-press ════════════════════════════════════ -->
+    <div class="longpress-hint" *ngIf="!isLoading && filteredSongs.length > 0 && !isSelecting" aria-hidden="true">
+      <ion-icon name="hand-left-outline"></ion-icon>
+      <span>Mantén presionada una canción para seleccionarla</span>
     </div>
 
     <!-- ══ Grid de Canciones ═══════════════════════════════════ -->
@@ -103,12 +74,18 @@
           role="listitem"
           *ngFor="let song of filteredSongs; trackBy: trackById; let i = index"
           [class.selected]="song.selected"
-          [attr.aria-selected]="showConfirmationButtons ? song.selected : null"
+          [class.selecting]="isSelecting"
+          [attr.aria-selected]="isSelecting ? song.selected : null"
           [attr.aria-label]="'Canción: ' + song.name"
           [style.animation-delay]="i * 30 + 'ms'"
-          (click)="showConfirmationButtons ? (song.selected = !song.selected) : openSongPage(song.id)"
+          (click)="onCardClick(song)"
+          (pointerdown)="onPointerDown($event, song)"
+          (pointerup)="onPointerUp()"
+          (pointerleave)="onPointerUp()"
+          (pointercancel)="onPointerUp()"
           tabindex="0"
-          (keydown.enter)="showConfirmationButtons ? (song.selected = !song.selected) : openSongPage(song.id)"
+          (keydown.enter)="isSelecting ? toggleSongSelection(song) : openSongPage(song.id)"
+          (keydown.space)="$event.preventDefault(); isSelecting ? toggleSongSelection(song) : startSelectionWith(song)"
         >
           <div class="card-content">
             <div class="icon-box">
@@ -117,11 +94,14 @@
             <h3 class="song-title">{{ song.name }}</h3>
 
             <!-- Checkbox en modo selección -->
-            <div class="selection-overlay" *ngIf="showConfirmationButtons" aria-hidden="true">
+            <div class="selection-overlay" *ngIf="isSelecting" aria-hidden="true">
               <div class="checkbox" [class.checked]="song.selected">
                 <ion-icon name="checkmark" *ngIf="song.selected"></ion-icon>
               </div>
             </div>
+
+            <!-- Ripple de long-press -->
+            <div class="longpress-ripple" [class.active]="song === longPressTarget"></div>
           </div>
         </div>
       </div>
@@ -149,4 +129,111 @@
     </div>
 
   </div>
+
+  <!-- ══ Bottom Action Bar — Selección Activa ════════════════ -->
+  <div
+    class="selection-bottom-bar"
+    [class.visible]="isSelecting"
+    role="toolbar"
+    aria-label="Acciones de selección"
+    aria-live="polite">
+    <div class="selection-info">
+      <ion-icon name="musical-notes" aria-hidden="true"></ion-icon>
+      <span><strong>{{ getSelectedCount() }}</strong> seleccionada{{ getSelectedCount() !== 1 ? 's' : '' }}</span>
+    </div>
+    <div class="selection-actions">
+      <button
+        id="btn-add-to-list"
+        class="bar-btn primary"
+        (click)="openAddToListModal()"
+        [disabled]="getSelectedCount() === 0"
+        aria-label="Agregar canciones seleccionadas a una lista">
+        <ion-icon name="add-circle-outline" aria-hidden="true"></ion-icon>
+        <span>Agregar a lista</span>
+      </button>
+      <button
+        id="btn-delete-selected"
+        class="bar-btn danger"
+        (click)="presentDeleteConfirm()"
+        [disabled]="getSelectedCount() === 0"
+        aria-label="Eliminar canciones seleccionadas">
+        <ion-icon name="trash-outline" aria-hidden="true"></ion-icon>
+        <span>Eliminar</span>
+      </button>
+      <button
+        id="btn-cancel-selection"
+        class="bar-btn cancel"
+        (click)="cancelSelection()"
+        aria-label="Cancelar selección">
+        <ion-icon name="close-outline" aria-hidden="true"></ion-icon>
+      </button>
+    </div>
+  </div>
+
+  <!-- ══ Modal: Agregar a Lista ══════════════════════════════ -->
+  <div
+    class="modal-backdrop"
+    [class.visible]="showListModal"
+    (click)="closeListModal()"
+    aria-hidden="true">
+  </div>
+  <div
+    class="add-to-list-sheet"
+    [class.visible]="showListModal"
+    role="dialog"
+    aria-modal="true"
+    aria-label="Seleccionar lista para agregar canciones">
+
+    <div class="sheet-handle" aria-hidden="true"></div>
+
+    <div class="sheet-header">
+      <div class="sheet-header-info">
+        <h2 class="sheet-title">Agregar a lista</h2>
+        <p class="sheet-subtitle">{{ getSelectedCount() }} canción{{ getSelectedCount() !== 1 ? 'es' : '' }} seleccionada{{ getSelectedCount() !== 1 ? 's' : '' }}</p>
+      </div>
+      <button class="sheet-close-btn" (click)="closeListModal()" aria-label="Cerrar">
+        <ion-icon name="close-outline"></ion-icon>
+      </button>
+    </div>
+
+    <!-- Buscador de listas -->
+    <div class="sheet-search">
+      <ion-icon name="search-outline" aria-hidden="true"></ion-icon>
+      <input
+        type="search"
+        placeholder="Buscar lista..."
+        [(ngModel)]="listSearchTerm"
+        (input)="filterModalLists()"
+        aria-label="Buscar lista"
+      >
+    </div>
+
+    <!-- Lista de repertorios -->
+    <div class="sheet-list" *ngIf="!isLoadingLists">
+      <div
+        class="sheet-list-item"
+        *ngFor="let list of filteredModalLists"
+        (click)="addSongsToList(list)"
+        [attr.aria-label]="'Agregar a ' + list.name">
+        <div class="sheet-item-icon">
+          <ion-icon name="list-outline" aria-hidden="true"></ion-icon>
+        </div>
+        <div class="sheet-item-info">
+          <span class="sheet-item-name">{{ list.name }}</span>
+          <span class="sheet-item-count">{{ list.songs?.length ?? 0 }} canciones</span>
+        </div>
+        <ion-icon name="add-circle-outline" class="sheet-item-add" aria-hidden="true"></ion-icon>
+      </div>
+      <div class="sheet-empty" *ngIf="filteredModalLists.length === 0">
+        <ion-icon name="albums-outline"></ion-icon>
+        <p>No se encontraron listas</p>
+      </div>
+    </div>
+
+    <div class="sheet-loading" *ngIf="isLoadingLists">
+      <div class="spinner"></div>
+      <p>Cargando listas...</p>
+    </div>
+  </div>
+
 </ion-content>

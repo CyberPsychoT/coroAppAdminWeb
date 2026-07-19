@@ -24,74 +24,21 @@
         <button
           id="btn-add-list"
           class="action-btn add-btn"
-          (click)="openAddList()"
+          (click)="openCreateListModal()"
           aria-label="Crear nueva lista">
           <ion-icon name="add-outline" aria-hidden="true"></ion-icon>
           <span>Nueva Lista</span>
         </button>
-
-        <button
-          id="btn-delete-lists"
-          class="action-btn delete-btn"
-          (click)="confirmDelete()"
-          *ngIf="!showCheckboxes && lists.length > 0"
-          aria-label="Seleccionar listas para eliminar">
-          <ion-icon name="trash-outline" aria-hidden="true"></ion-icon>
-        </button>
       </div>
     </header>
 
-    <!-- ══ Banner: Canciones Seleccionadas ═══════════════════ -->
-    <div
-      class="info-banner anim-slide-down"
-      *ngIf="selectedSongs.length > 0 && !showCheckboxes"
-      role="status"
-      aria-live="polite">
-      <div class="banner-content">
-        <div class="icon-wrapper pulse-icon">
-          <ion-icon name="musical-notes" aria-hidden="true"></ion-icon>
-        </div>
-        <div class="text-content">
-          <h3>{{ selectedSongs.length }} canciones seleccionadas</h3>
-          <p>Elige una lista para añadirlas</p>
-        </div>
-      </div>
+    <!-- ══ Hint: long-press ═══════════════════════════════════ -->
+    <div class="longpress-hint" *ngIf="!isLoading && filteredLists.length > 0 && !isSelecting" aria-hidden="true">
+      <ion-icon name="hand-left-outline"></ion-icon>
+      <span>Mantén presionada una lista para seleccionarla</span>
     </div>
 
-    <!-- ══ Banner: Modo Eliminación ══════════════════════════ -->
-    <div
-      class="danger-banner anim-slide-down"
-      *ngIf="showCheckboxes"
-      role="alert"
-      aria-live="assertive">
-      <div class="banner-content">
-        <div class="icon-wrapper">
-          <ion-icon name="warning" aria-hidden="true"></ion-icon>
-        </div>
-        <div class="text-content">
-          <h3>Modo Eliminación</h3>
-          <p>Selecciona las listas que deseas borrar</p>
-        </div>
-      </div>
-      <div class="banner-actions">
-        <button
-          id="btn-cancel-delete"
-          class="cancel-btn"
-          (click)="cancelSelectedLists()"
-          aria-label="Cancelar eliminación">
-          Cancelar
-        </button>
-        <button
-          id="btn-confirm-delete"
-          class="confirm-btn"
-          (click)="presentDeleteConfirm()"
-          aria-label="Confirmar eliminación de listas seleccionadas">
-          Eliminar
-        </button>
-      </div>
-    </div>
-
-    <!-- ══ SKELETON LOADERS — Mientras cargan ════════════════ -->
+    <!-- ══ SKELETON LOADERS ════════════════════════════════════ -->
     <div class="lists-grid" *ngIf="isLoading" aria-hidden="true" aria-label="Cargando listas...">
       <div class="list-card skeleton-list-card" *ngFor="let i of [1,2,3,4,5,6]">
         <div class="skeleton-card-top">
@@ -105,7 +52,7 @@
       </div>
     </div>
 
-    <!-- ══ DATOS REALES — Grid de Listas ═════════════════════ -->
+    <!-- ══ Grid de Listas ══════════════════════════════════════ -->
     <div
       class="lists-grid anim-fade-up"
       *ngIf="!isLoading && filteredLists.length > 0"
@@ -115,14 +62,18 @@
         class="list-card"
         role="listitem"
         *ngFor="let list of filteredLists; trackBy: trackById; let i = index"
-        [class.selected-mode]="showCheckboxes"
-        [class.active]="list.selected"
-        [attr.aria-selected]="showCheckboxes ? list.selected : null"
+        [class.is-selecting]="isSelecting"
+        [class.is-selected]="list.selected"
+        [attr.aria-selected]="isSelecting ? list.selected : null"
         [attr.aria-label]="'Lista: ' + list.name"
         [style.animation-delay]="i * 40 + 'ms'"
-        (click)="showCheckboxes ? list.selected = !list.selected : openListPage(list.id)"
+        (click)="onCardClick(list)"
+        (pointerdown)="onPointerDown($event, list)"
+        (pointerup)="onPointerUp()"
+        (pointerleave)="onPointerUp()"
+        (pointercancel)="onPointerUp()"
         tabindex="0"
-        (keydown.enter)="showCheckboxes ? list.selected = !list.selected : openListPage(list.id)"
+        (keydown.enter)="isSelecting ? toggleListSelection(list) : openListPage(list.id)"
       >
         <!-- Strip de estado -->
         <div class="card-status-strip" [class.active]="list.status" aria-hidden="true"></div>
@@ -133,8 +84,9 @@
             <div class="icon-box">
               <ion-icon name="list" aria-hidden="true"></ion-icon>
             </div>
-            <!-- Toggle status -->
-            <div class="status-toggle" (click)="$event.stopPropagation()" *ngIf="!showCheckboxes">
+
+            <!-- Toggle status (solo en modo normal) -->
+            <div class="status-toggle" (click)="$event.stopPropagation()" *ngIf="!isSelecting">
               <ion-toggle
                 [checked]="list.status"
                 (ionChange)="toggleStatus(list, $event)"
@@ -142,13 +94,12 @@
                 [attr.aria-label]="'Lista ' + list.name + (list.status ? ' activa' : ' inactiva')">
               </ion-toggle>
             </div>
-            <!-- Checkbox en modo eliminación -->
-            <div class="checkbox-wrapper" *ngIf="showCheckboxes">
-              <ion-checkbox
-                [(ngModel)]="list.selected"
-                (click)="$event.stopPropagation()"
-                [attr.aria-label]="'Seleccionar lista ' + list.name">
-              </ion-checkbox>
+
+            <!-- Checkbox en modo selección -->
+            <div class="checkbox-wrapper" *ngIf="isSelecting" aria-hidden="true">
+              <div class="custom-checkbox" [class.checked]="list.selected">
+                <ion-icon name="checkmark" *ngIf="list.selected"></ion-icon>
+              </div>
             </div>
           </div>
 
@@ -161,7 +112,7 @@
                 size="small"
                 class="edit-name-btn"
                 (click)="editList(list, $event)"
-                *ngIf="!showCheckboxes"
+                *ngIf="!isSelecting"
                 [attr.aria-label]="'Editar nombre de ' + list.name">
                 <ion-icon name="create-outline" aria-hidden="true"></ion-icon>
               </ion-button>
@@ -177,16 +128,11 @@
             <span class="date-badge">
               {{ list.createdAt | date:'dd MMM yyyy' }}
             </span>
-            <button
-              class="add-songs-btn"
-              *ngIf="selectedSongs.length > 0 && !showCheckboxes"
-              (click)="presentAddConfirm(list.id); $event.stopPropagation()"
-              [attr.aria-label]="'Añadir canciones a ' + list.name">
-              <ion-icon name="add" aria-hidden="true"></ion-icon>
-              Añadir
-            </button>
           </div>
         </div>
+
+        <!-- Long-press ripple -->
+        <div class="longpress-ripple" [class.active]="list === longPressTarget"></div>
       </div>
     </div>
 
@@ -204,7 +150,7 @@
       <button
         id="btn-create-first-list"
         class="create-first-btn"
-        (click)="openAddList()"
+        (click)="openCreateListModal()"
         aria-label="Crear primera lista de repertorio">
         <ion-icon name="add-circle-outline" aria-hidden="true"></ion-icon>
         Crear Lista
@@ -212,4 +158,36 @@
     </div>
 
   </div>
+
+  <!-- ══ Bottom Action Bar — Selección Activa ════════════════ -->
+  <div
+    class="selection-bottom-bar"
+    [class.visible]="isSelecting"
+    role="toolbar"
+    aria-label="Acciones de selección"
+    aria-live="polite">
+    <div class="selection-info">
+      <ion-icon name="albums" aria-hidden="true"></ion-icon>
+      <span><strong>{{ getSelectedCount() }}</strong> seleccionada{{ getSelectedCount() !== 1 ? 's' : '' }}</span>
+    </div>
+    <div class="selection-actions">
+      <button
+        id="btn-delete-selected-lists"
+        class="bar-btn danger"
+        (click)="presentDeleteConfirm()"
+        [disabled]="getSelectedCount() === 0"
+        aria-label="Eliminar listas seleccionadas">
+        <ion-icon name="trash-outline" aria-hidden="true"></ion-icon>
+        <span>Eliminar</span>
+      </button>
+      <button
+        id="btn-cancel-list-selection"
+        class="bar-btn cancel"
+        (click)="cancelSelection()"
+        aria-label="Cancelar selección">
+        <ion-icon name="close-outline" aria-hidden="true"></ion-icon>
+      </button>
+    </div>
+  </div>
+
 </ion-content>

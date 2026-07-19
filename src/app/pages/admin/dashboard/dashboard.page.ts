@@ -1,31 +1,46 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthService } from 'src/app/services/auth.service';
 import { Song } from 'src/app/interfaces/song';
+import { List } from 'src/app/interfaces/list';
 import { FirestoreService } from 'src/app/services/firestore.service';
-import { AlertController, ModalController } from '@ionic/angular';
+import { AlertController, ToastController } from '@ionic/angular';
 import { doc, deleteDoc, Firestore } from '@angular/fire/firestore';
 import { AddSongComponent } from 'src/app/components/add-song/add-song.component';
+import { first } from 'rxjs/operators';
 import Swal from 'sweetalert2';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-dashboard',
   templateUrl: './dashboard.page.html',
   styleUrls: ['./dashboard.page.scss'],
 })
-export class DashboardPage implements OnInit {
+export class DashboardPage implements OnInit, OnDestroy {
   songs: any[] = [];
   filteredSongs: any[] = [];
   searchTerm: string = '';
-  selectedSongs: string[] = [];
-  showConfirmationButtons = false;
-  isLoading = true; // Skeleton loader flag
+  isLoading = true;
+
+  // ── Selección por long-press ──────────────────────
+  isSelecting = false;
+  longPressTarget: any = null;
+  private longPressTimer: any = null;
+  private readonly LONG_PRESS_MS = 450;
+
+  // ── Modal: Agregar a lista ────────────────────────
+  showListModal = false;
+  lists: List[] = [];
+  filteredModalLists: List[] = [];
+  listSearchTerm = '';
+  isLoadingLists = false;
+  private listsSub?: Subscription;
 
   constructor(
     private router: Router,
     private auth: AuthService,
-    private modalController: ModalController,
     private alertController: AlertController,
+    private toastController: ToastController,
     private firestore: FirestoreService,
     private fireStore: Firestore
   ) {}
@@ -38,83 +53,129 @@ export class DashboardPage implements OnInit {
     });
   }
 
-  // NUEVA FUNCIÓN PARA OPTIMIZAR EL *ngFor
-  // Esta función ayuda a Angular a identificar qué elementos de la lista han cambiado,
-  // mejorando el rendimiento al evitar que se vuelvan a renderizar todos los elementos.
+  ngOnDestroy() {
+    this.listsSub?.unsubscribe();
+    this.clearLongPressTimer();
+  }
+
+  // ── Optimización ngFor ────────────────────────────
   trackById(index: number, song: any): string {
     return song.id;
   }
 
-  // Filtrar canciones
-  // Elimina acentos y convierte a minúsculas
+  // ── Filtrar canciones ─────────────────────────────
   normalizeText(text: string): string {
     return text
-      .normalize('NFD')                    // separa letras y tildes (e.g. "á" => "á")
-      .replace(/[\u0300-\u036f]/g, '')    // elimina las tildes
-      .replace(/[^a-z0-9\s]/gi, '')       // elimina otros signos como comas, puntos, etc.
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9\s]/gi, '')
       .toLowerCase();
   }
 
   filterSongs() {
     const term = this.normalizeText(this.searchTerm || '');
-
     this.filteredSongs = term
-      ? this.songs.filter(song =>
-        this.normalizeText(song.name).includes(term)
-      )
+      ? this.songs.filter(song => this.normalizeText(song.name).includes(term))
       : this.songs;
   }
 
-  //Navegar a la pagina de la cancion con id:
+  // ── Navegación ────────────────────────────────────
   openSongPage(songId: string) {
     this.router.navigate(['admin/dashboard/song', songId]);
   }
 
-  //Boton para eliminar cancion por id
-  async clickDelete(song: Song) {
-    const response = await this.firestore.deleteSong(song);
-    console.log(response);
-  }
-
   openAddSongModal() {
-    // Navigate to the AddSongComponent
-    this.router.navigate(['components/add-song']); // Make sure this route matches your actual route configuration
+    this.router.navigate(['components/add-song']);
   }
 
-  //Eliminar canciones por mayor
+  goToLists() {
+    this.router.navigate(['admin/list-week']);
+  }
 
+  // ── Long-press: Selección ─────────────────────────
+  onPointerDown(event: PointerEvent, song: any) {
+    // Solo touch o botón primario del mouse
+    if (event.button !== 0 && event.pointerType !== 'touch') return;
+
+    this.longPressTarget = song;
+
+    this.clearLongPressTimer();
+    this.longPressTimer = setTimeout(() => {
+      this.startSelectionWith(song);
+      this.longPressTarget = null;
+      // Vibrar en móvil si está disponible
+      if (navigator.vibrate) {
+        navigator.vibrate(40);
+      }
+    }, this.LONG_PRESS_MS);
+  }
+
+  onPointerUp() {
+    this.clearLongPressTimer();
+    this.longPressTarget = null;
+  }
+
+  private clearLongPressTimer() {
+    if (this.longPressTimer) {
+      clearTimeout(this.longPressTimer);
+      this.longPressTimer = null;
+    }
+  }
+
+  startSelectionWith(song: any) {
+    this.isSelecting = true;
+    song.selected = true;
+  }
+
+  onCardClick(song: any) {
+    if (this.isSelecting) {
+      this.toggleSongSelection(song);
+    } else {
+      this.openSongPage(song.id);
+    }
+  }
+
+  toggleSongSelection(song: any) {
+    song.selected = !song.selected;
+    // Si deselecciona todo, salir del modo selección
+    if (this.getSelectedCount() === 0) {
+      this.isSelecting = false;
+    }
+  }
+
+  getSelectedCount(): number {
+    return this.songs.filter(s => s.selected).length;
+  }
+
+  cancelSelection() {
+    this.songs.forEach(song => (song.selected = false));
+    this.isSelecting = false;
+  }
+
+  // ── Eliminar canciones seleccionadas ─────────────
   deleteSelectedSongs() {
     this.songs
       .filter((song) => song.selected)
       .forEach((song) => {
         const songDocRef = doc(this.fireStore, `songs/${song.id}`);
         deleteDoc(songDocRef)
-          .then(() => {
-            console.log(`Deleted song: ${song.name}`);
-          })
-          .catch((error: any) => {
-            console.error('Error deleting song:', error);
-          });
+          .then(() => console.log(`Deleted song: ${song.name}`))
+          .catch((error: any) => console.error('Error deleting song:', error));
       });
-    // Opcional: Ocultar los botones después de la eliminación
-    this.showConfirmationButtons = false;
+    this.cancelSelection();
   }
 
-  //Boton confirmar eliminacion
   async presentDeleteConfirm() {
-    const selectedCount = this.songs.filter((s) => s.selected).length;
-    
-    if (selectedCount === 0) {
-      return;
-    }
+    const selectedCount = this.getSelectedCount();
+    if (selectedCount === 0) return;
 
     const { isConfirmed } = await Swal.fire({
       title: '¿Estás seguro?',
-      text: `¿Seguro que desea eliminar ${selectedCount} cantidad de canciones?`,
+      text: `¿Seguro que desea eliminar ${selectedCount} canción${selectedCount > 1 ? 'es' : ''}?`,
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonColor: '#3085d6',
-      cancelButtonColor: '#d33',
+      confirmButtonColor: '#ef4444',
+      cancelButtonColor: '#6b7280',
       confirmButtonText: 'Sí, eliminar',
       cancelButtonText: 'Cancelar',
       heightAuto: false
@@ -122,40 +183,108 @@ export class DashboardPage implements OnInit {
 
     if (isConfirmed) {
       this.deleteSelectedSongs();
-      
       await Swal.fire({
         title: '¡Eliminadas!',
-        text: 'Eliminadas perfectamente',
+        text: 'Las canciones fueron eliminadas correctamente',
         icon: 'success',
-        heightAuto: false
+        timer: 2000,
+        heightAuto: false,
+        showConfirmButton: false
       });
     }
   }
 
-  cancelSelectedSongs() {
-    this.songs.forEach((song) => (song.selected = false));
-    // Ocultar los botones al cancelar
-    this.showConfirmationButtons = false;
-  }
+  // ── Modal: Agregar a Lista ────────────────────────
+  openAddToListModal() {
+    if (this.getSelectedCount() === 0) return;
 
-  toggleConfirmationButtons() {
-    this.showConfirmationButtons = !this.showConfirmationButtons;
-  }
+    this.showListModal = true;
+    this.listSearchTerm = '';
+    this.isLoadingLists = true;
 
-  //Agregar canciones a lista
-  showLists() {
-    this.selectedSongs = this.songs
-      .filter((song) => song.selected)
-      .map((song) => song.id);
-
-    this.cancelSelectedSongs();
-
-    this.router.navigate(['admin/list-week'], {
-      queryParams: { selectedSongs: JSON.stringify(this.selectedSongs) },
+    // Cargar listas solo una vez al abrir el modal
+    this.listsSub?.unsubscribe();
+    this.listsSub = this.firestore.getLists().pipe(first()).subscribe((lists) => {
+      this.lists = lists
+        .map(list => {
+          if (list.createdAt && (list.createdAt as any).toDate) {
+            list.createdAt = (list.createdAt as any).toDate();
+          }
+          return list;
+        })
+        .sort((a, b) => a.name.localeCompare(b.name));
+      this.filteredModalLists = this.lists;
+      this.isLoadingLists = false;
     });
   }
 
-  getSelectedCount(): number {
-    return this.songs.filter(s => s.selected).length;
+  closeListModal() {
+    this.showListModal = false;
+    this.listSearchTerm = '';
+    this.filteredModalLists = [];
+  }
+
+  filterModalLists() {
+    const term = this.normalizeText(this.listSearchTerm || '');
+    this.filteredModalLists = term
+      ? this.lists.filter(list => this.normalizeText(list.name).includes(term))
+      : this.lists;
+  }
+
+  async addSongsToList(list: List) {
+    if (!list.id) return;
+
+    const selectedIds = this.songs
+      .filter(s => s.selected)
+      .map(s => s.id);
+
+    this.closeListModal();
+
+    try {
+      const currentList = await this.firestore.getListById(list.id).pipe(first()).toPromise();
+      if (!currentList) return;
+
+      if (!currentList.songs) currentList.songs = [];
+
+      const songsToAdd = selectedIds
+        .filter(id => !currentList.songs.some((s: any) => s.songId === id))
+        .map(id => ({ songId: id, section: 'Todas las Canciones' }));
+
+      if (songsToAdd.length > 0) {
+        const updatedSongs = [...currentList.songs, ...songsToAdd];
+        await this.firestore.updateSongsInList(list.id, updatedSongs);
+        this.presentToast(songsToAdd.length, list.name, 'success');
+      } else {
+        this.presentToast(0, list.name, 'info');
+      }
+
+      this.cancelSelection();
+    } catch (error) {
+      console.error('Error adding songs to list:', error);
+      this.presentToast(-1, list.name, 'error');
+    }
+  }
+
+  async presentToast(numSongs: number, listName: string, type: 'success' | 'error' | 'info') {
+    const messages = {
+      success: `✓ ${numSongs} canción${numSongs !== 1 ? 'es' : ''} añadida${numSongs !== 1 ? 's' : ''} a "${listName}"`,
+      error: `Error al añadir canciones a "${listName}"`,
+      info: `Las canciones ya estaban en "${listName}"`
+    };
+
+    const colors = {
+      success: 'var(--ion-color-success, #22c55e)',
+      error: 'var(--ion-color-danger, #ef4444)',
+      info: 'var(--ion-color-primary)'
+    };
+
+    const toast = await this.toastController.create({
+      message: messages[type],
+      duration: 3500,
+      position: 'bottom',
+      cssClass: `app-toast toast-${type}`,
+      buttons: [{ icon: 'close', role: 'cancel' }]
+    });
+    await toast.present();
   }
 }

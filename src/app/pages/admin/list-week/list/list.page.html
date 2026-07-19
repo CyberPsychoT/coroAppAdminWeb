@@ -1,5 +1,6 @@
 <ion-content [fullscreen]="true">
   <div class="page-container">
+
     <!-- Encabezado de la Página -->
     <header class="page-header">
       <ion-button fill="clear" class="back-button" (click)="goBack()">
@@ -12,7 +13,7 @@
     </header>
 
     <!-- Acordeón de Secciones -->
-    <div class="sections-accordion">
+    <div class="sections-accordion" *ngIf="sections.length > 0; else loadingState">
       <ng-container *ngFor="let section of sections; trackBy: trackBySectionName">
         <div class="section-card" [class.open]="section.open">
           <ion-item class="section-header" lines="none" (click)="toggleSection(section)">
@@ -45,13 +46,124 @@
               </ion-item>
             </ion-list>
             <ng-template #emptySection>
-              <div class="empty-state">
-                <p>No hay canciones en esta sección.</p>
+              <div class="empty-section-state">
+                <ion-icon name="musical-notes-outline"></ion-icon>
+                <p>No hay canciones en esta sección</p>
               </div>
             </ng-template>
           </div>
         </div>
       </ng-container>
     </div>
+
+    <ng-template #loadingState>
+      <div class="loading-state">
+        <div class="spinner"></div>
+        <p>Cargando lista...</p>
+      </div>
+    </ng-template>
+
   </div>
+
+  <!-- ══ FAB: Agregar Canciones ════════════════════════════ -->
+  <button
+    class="add-songs-fab"
+    (click)="openAddSongsModal()"
+    aria-label="Agregar canciones a esta lista">
+    <ion-icon name="add" aria-hidden="true"></ion-icon>
+    <span>Agregar canciones</span>
+  </button>
+
+  <!-- ══ Modal Backdrop ════════════════════════════════════ -->
+  <div
+    class="modal-backdrop"
+    [class.visible]="showSongsModal"
+    (click)="closeAddSongsModal()"
+    aria-hidden="true">
+  </div>
+
+  <!-- ══ Bottom Sheet: Repertorio ══════════════════════════ -->
+  <div
+    class="add-songs-sheet"
+    [class.visible]="showSongsModal"
+    role="dialog"
+    aria-modal="true"
+    aria-label="Seleccionar canciones para agregar">
+
+    <div class="sheet-handle" aria-hidden="true"></div>
+
+    <div class="sheet-header">
+      <div class="sheet-header-info">
+        <h2 class="sheet-title">Agregar canciones</h2>
+        <p class="sheet-subtitle" *ngIf="getModalSelectedCount() > 0">
+          {{ getModalSelectedCount() }} canción{{ getModalSelectedCount() !== 1 ? 'es' : '' }} seleccionada{{ getModalSelectedCount() !== 1 ? 's' : '' }}
+        </p>
+        <p class="sheet-subtitle" *ngIf="getModalSelectedCount() === 0">
+          Selecciona las canciones que quieres añadir
+        </p>
+      </div>
+      <button class="sheet-close-btn" (click)="closeAddSongsModal()" aria-label="Cerrar">
+        <ion-icon name="close-outline"></ion-icon>
+      </button>
+    </div>
+
+    <!-- Buscador -->
+    <div class="sheet-search">
+      <ion-icon name="search-outline" aria-hidden="true"></ion-icon>
+      <input
+        type="search"
+        placeholder="Buscar canción..."
+        [(ngModel)]="songSearchTerm"
+        (input)="filterModalSongs()"
+        aria-label="Buscar canción"
+      >
+    </div>
+
+    <!-- Lista de canciones del repertorio -->
+    <div class="sheet-list" *ngIf="!isLoadingSongs">
+      <div
+        class="sheet-song-item"
+        *ngFor="let song of filteredModalSongs"
+        [class.selected]="song.modalSelected"
+        [class.already-added]="isSongInList(song.id)"
+        (click)="toggleModalSong(song)"
+        [attr.aria-label]="song.name + (isSongInList(song.id) ? ' (ya está en la lista)' : '')">
+        <div class="sheet-item-icon">
+          <ion-icon [name]="isSongInList(song.id) ? 'checkmark-circle' : 'musical-note-outline'" aria-hidden="true"></ion-icon>
+        </div>
+        <div class="sheet-item-info">
+          <span class="sheet-item-name">{{ song.name }}</span>
+          <span class="sheet-item-label" *ngIf="isSongInList(song.id)">Ya está en la lista</span>
+        </div>
+        <div class="sheet-item-check" *ngIf="!isSongInList(song.id)">
+          <div class="check-circle" [class.checked]="song.modalSelected">
+            <ion-icon name="checkmark" *ngIf="song.modalSelected" aria-hidden="true"></ion-icon>
+          </div>
+        </div>
+      </div>
+
+      <div class="sheet-empty" *ngIf="filteredModalSongs.length === 0">
+        <ion-icon name="musical-notes-outline"></ion-icon>
+        <p>No se encontraron canciones</p>
+      </div>
+    </div>
+
+    <div class="sheet-loading" *ngIf="isLoadingSongs">
+      <div class="spinner"></div>
+      <p>Cargando repertorio...</p>
+    </div>
+
+    <!-- Botón Confirmar -->
+    <div class="sheet-footer">
+      <button
+        class="confirm-add-btn"
+        [disabled]="getModalSelectedCount() === 0"
+        (click)="confirmAddSongs()"
+        aria-label="Confirmar agregar canciones seleccionadas">
+        <ion-icon name="add-circle-outline" aria-hidden="true"></ion-icon>
+        Añadir {{ getModalSelectedCount() > 0 ? getModalSelectedCount() + ' canción' + (getModalSelectedCount() !== 1 ? 'es' : '') : 'canciones' }}
+      </button>
+    </div>
+  </div>
+
 </ion-content>

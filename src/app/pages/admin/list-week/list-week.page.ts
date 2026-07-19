@@ -1,11 +1,8 @@
 import { Component, OnInit } from '@angular/core';
-import { Firestore } from '@angular/fire/firestore';
-import { ActivatedRoute, Router } from '@angular/router';
-import { deleteDoc, doc } from '@firebase/firestore';
+import { Router } from '@angular/router';
 import { FirestoreService } from 'src/app/services/firestore.service';
 import { List } from 'src/app/interfaces/list';
 import { AlertController, ToastController } from '@ionic/angular';
-import { first } from 'rxjs/operators';
 import Swal from 'sweetalert2';
 
 @Component({
@@ -17,27 +14,22 @@ export class ListWeekPage implements OnInit {
   lists: List[] = [];
   filteredLists: List[] = [];
   searchTerm: string = '';
-  showCheckboxes: boolean = false;
-  selectedSongs: string[] = [];
-  isLoading = true; // Skeleton loader flag
+  isLoading = true;
 
-
+  // ── Selección por long-press ──────────────────────
+  isSelecting = false;
+  longPressTarget: any = null;
+  private longPressTimer: any = null;
+  private readonly LONG_PRESS_MS = 450;
 
   constructor(
     private router: Router,
     private alertController: AlertController,
     private toastController: ToastController,
     private firestore: FirestoreService,
-    private activatedRoute: ActivatedRoute
   ) { }
 
   ngOnInit() {
-    this.activatedRoute.queryParams.subscribe((params) => {
-      if (params['selectedSongs']) {
-        this.selectedSongs = JSON.parse(params['selectedSongs']);
-      }
-    });
-
     this.firestore.getLists().subscribe((lists) => {
       this.lists = lists.map(list => {
         if (list.createdAt && (list.createdAt as any).toDate) {
@@ -50,179 +42,247 @@ export class ListWeekPage implements OnInit {
     });
   }
 
-  // FUNCIÓN PARA OPTIMIZAR EL *ngFor
+  ngOnDestroy() {
+    this.clearLongPressTimer();
+  }
+
+  // ── Optimización ngFor ────────────────────────────
   trackById(index: number, list: List): string | undefined {
     return list.id;
   }
 
-  // Filtrar canciones
-  // Elimina acentos y convierte a minúsculas
+  // ── Filtrar listas ────────────────────────────────
   normalizeText(text: string): string {
     return text
-      .normalize('NFD')                    // separa letras y tildes (e.g. "á" => "á")
-      .replace(/[\u0300-\u036f]/g, '')    // elimina las tildes
-      .replace(/[^a-z0-9\s]/gi, '')       // elimina otros signos como comas, puntos, etc.
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/[^a-z0-9\s]/gi, '')
       .toLowerCase();
   }
 
   filterLists() {
     const term = this.normalizeText(this.searchTerm || '');
-
     this.filteredLists = term
-      ? this.lists.filter((list) =>
-        this.normalizeText(list.name).includes(term)
-      )
+      ? this.lists.filter(list => this.normalizeText(list.name).includes(term))
       : this.lists;
   }
 
-  //Navegar a la pagina de la cancion con id:
+  // ── Navegación ────────────────────────────────────
   openListPage(listId: string | undefined) {
     if (listId) {
       this.router.navigate(['admin/list-week/list', listId]);
-    } else {
-      console.log('Error: List ID is undefined');
     }
   }
 
-  //Boton para eliminar cancion por id
-  async clickDelete(list: List) {
-    const response = await this.firestore.deleteList(list);
-    console.log(response);
+  // ── Long-press: Selección ─────────────────────────
+  onPointerDown(event: PointerEvent, list: any) {
+    if (event.button !== 0 && event.pointerType !== 'touch') return;
+
+    this.longPressTarget = list;
+    this.clearLongPressTimer();
+    this.longPressTimer = setTimeout(() => {
+      this.startSelectionWith(list);
+      this.longPressTarget = null;
+      if (navigator.vibrate) navigator.vibrate(40);
+    }, this.LONG_PRESS_MS);
   }
 
+  onPointerUp() {
+    this.clearLongPressTimer();
+    this.longPressTarget = null;
+  }
+
+  private clearLongPressTimer() {
+    if (this.longPressTimer) {
+      clearTimeout(this.longPressTimer);
+      this.longPressTimer = null;
+    }
+  }
+
+  startSelectionWith(list: any) {
+    this.isSelecting = true;
+    list.selected = true;
+  }
+
+  onCardClick(list: any) {
+    if (this.isSelecting) {
+      this.toggleListSelection(list);
+    } else {
+      this.openListPage(list.id);
+    }
+  }
+
+  toggleListSelection(list: any) {
+    list.selected = !list.selected;
+    if (this.getSelectedCount() === 0) {
+      this.isSelecting = false;
+    }
+  }
+
+  getSelectedCount(): number {
+    return this.lists.filter(l => l.selected).length;
+  }
+
+  cancelSelection() {
+    this.lists.forEach(list => (list.selected = false));
+    this.isSelecting = false;
+  }
+
+  // ── Toggle estado activo/inactivo ─────────────────
   async toggleStatus(list: List, event: any) {
-    event.stopPropagation(); // Evitar que se abra la lista al hacer click en el toggle
+    event.stopPropagation();
     const newStatus = event.detail.checked;
     const updatedList = { ...list, status: newStatus };
-    
+
     try {
       if (list.id) {
         await this.firestore.updateList(list.id, updatedList);
-        console.log(`List ${list.name} status updated to ${newStatus}`);
-      } else {
-        console.error('List ID is missing');
       }
     } catch (error) {
       console.error('Error updating list status:', error);
-      // Revertir el cambio visual si falla la actualización
       list.status = !newStatus;
     }
   }
 
+  // ── Editar nombre (SweetAlert inline) ────────────
   async editList(list: List, event: any) {
     event.stopPropagation();
-    
-    // 1. Mostrar Input con SweetAlert2
+
     const { value: newName } = await Swal.fire({
-      title: 'Editar Nombre de Lista',
+      title: 'Editar Nombre',
       input: 'text',
       inputLabel: 'Nuevo nombre',
       inputValue: list.name,
       showCancelButton: true,
       confirmButtonText: 'Guardar',
       cancelButtonText: 'Cancelar',
-      confirmButtonColor: '#ff8c00', // Primary Orange
-      cancelButtonColor: '#d33',
-      heightAuto: false, // Recommended for Ionic
+      confirmButtonColor: '#ff8c00',
+      cancelButtonColor: '#6b7280',
+      heightAuto: false,
       inputValidator: (value) => {
-        if (!value) {
-          return '¡El nombre no puede estar vacío!';
-        }
+        if (!value || !value.trim()) return '¡El nombre no puede estar vacío!';
         return null;
       }
     });
 
-    if (newName && newName !== list.name) {
-      this.updateListName(list, newName);
+    if (newName && newName.trim() !== list.name) {
+      await this.updateListName(list, newName.trim());
     }
   }
 
   async updateListName(list: List, newName: string) {
     if (!list.id) return;
 
-    // 2. Mostrar Loading "Cambiando nombre..."
     Swal.fire({
-      title: 'Cambiando nombre de la lista...',
+      title: 'Cambiando nombre...',
       allowOutsideClick: false,
       heightAuto: false,
-      didOpen: () => {
-        Swal.showLoading();
-      }
+      didOpen: () => Swal.showLoading()
     });
 
     try {
       await this.firestore.updateList(list.id, { name: newName });
-      
-      // 3. Mostrar Éxito (Verde)
       Swal.fire({
         icon: 'success',
-        title: '¡Éxito!',
-        text: 'Nombre modificado correctamente',
+        title: '¡Listo!',
+        text: 'Nombre actualizado correctamente',
         timer: 2000,
         heightAuto: false,
         showConfirmButton: false
       });
-      
     } catch (error) {
-      console.error('Error updating list name:', error);
-      
-      // 4. Mostrar Error (Rojo)
       Swal.fire({
         icon: 'error',
         title: 'Error',
-        text: 'Hubo un problema al actualizar el nombre',
+        text: 'No se pudo actualizar el nombre',
         heightAuto: false
       });
     }
   }
 
-  openAddList() {
-    this.router.navigate(['components/add-list']); // Make sure this route matches your actual route configuration
-  }
-  //Eliminar listas por mayor
+  // ── Crear lista — Modal inline ────────────────────
+  async openCreateListModal() {
+    const { value: name } = await Swal.fire({
+      title: 'Nueva Lista',
+      input: 'text',
+      inputLabel: 'Nombre de la lista',
+      inputPlaceholder: 'Ej: Misa Domingo 27 de julio',
+      showCancelButton: true,
+      confirmButtonText: 'Crear Lista',
+      cancelButtonText: 'Cancelar',
+      confirmButtonColor: '#ff8c00',
+      cancelButtonColor: '#6b7280',
+      heightAuto: false,
+      inputValidator: (value) => {
+        if (!value || !value.trim()) return '¡El nombre es obligatorio!';
+        return null;
+      }
+    });
 
-  confirmDelete() {
-    this.showCheckboxes = true;
+    if (name && name.trim()) {
+      await this.createList(name.trim());
+    }
   }
 
-  deleteSelectedLists() {
-    // Implementing deletion logic here, note that it's `deleteSelectedLists` by context
-    this.lists
-      .filter((list) => list.selected)
-      .forEach((list) => {
-        this.firestore
-          .deleteList(list)
-          .then(() => {
-            console.log(`Deleted list: ${list.name}`);
-          })
-          .catch((error) => {
-            console.error('Error deleting list:', error);
-          });
+  async createList(name: string) {
+    Swal.fire({
+      title: 'Creando lista...',
+      allowOutsideClick: false,
+      heightAuto: false,
+      didOpen: () => Swal.showLoading()
+    });
+
+    try {
+      const newList: List = {
+        name,
+        songs: [],
+        createdAt: new Date(),
+        selected: false,
+        status: true,
+      };
+
+      const response = await this.firestore.addList(newList);
+
+      if (response) {
+        Swal.fire({
+          icon: 'success',
+          title: '¡Lista creada!',
+          text: `"${name}" está lista para usar`,
+          timer: 2000,
+          heightAuto: false,
+          showConfirmButton: false
+        });
+      } else {
+        throw new Error('No response from Firestore');
+      }
+    } catch (error) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'No se pudo crear la lista',
+        heightAuto: false
       });
-    this.showCheckboxes = false;
+    }
   }
-  //Aletar para la confirmacion
 
+  // ── Eliminar listas seleccionadas ─────────────────
   async presentDeleteConfirm() {
+    const count = this.getSelectedCount();
+    if (count === 0) return;
+
     const alert = await this.alertController.create({
-      header: 'Confirmar Eliminación',
-      message:
-        '¿Estás seguro de que quieres eliminar las listas seleccionadas?',
+      header: 'Eliminar listas',
+      message: `¿Seguro que deseas eliminar ${count} lista${count > 1 ? 's' : ''}? Esta acción no se puede deshacer.`,
       buttons: [
         {
           text: 'Cancelar',
           role: 'cancel',
-          cssClass: 'secondary',
-          handler: () => {
-            console.log('Eliminación cancelada');
-          },
         },
         {
           text: 'Eliminar',
-          handler: () => {
-            this.deleteSelectedLists(); // Llamar a la función de eliminación si el usuario confirma
-            console.log('Listas eliminadas');
-          },
+          role: 'destructive',
+          cssClass: 'danger-button',
+          handler: () => this.deleteSelectedLists(),
         },
       ],
     });
@@ -230,80 +290,21 @@ export class ListWeekPage implements OnInit {
     await alert.present();
   }
 
-  cancelSelectedLists() {
-    this.filteredLists.forEach((list) => (list.selected = false));
-    this.showCheckboxes = false;
-  }
-
-  //Agregar canciones a lista
-  async presentAddConfirm(listId: string | undefined) {
-    if (!listId) return;
-    
-    const alert = await this.alertController.create({
-      header: 'Confirmar adición',
-      message: '¿Deseas agregar las canciones seleccionadas a esta lista?',
-      buttons: [
-        {
-          text: 'Cancelar',
-          role: 'cancel',
-          handler: () => {
-            console.log('Adición cancelada');
-          },
-        },
-        {
-          text: 'Confirmar',
-          handler: () => {
-            this.addSongsToList(listId); // Llama a addSongsToList solo si confirma
-          },
-        },
-      ],
-    });
-
-    await alert.present();
-  }
-
-  async addSongsToList(listId: string) {
-    if (!listId) {
-      console.error('No list ID provided');
-      return;
-    }
-    this.firestore
-      .getListById(listId)
-      .pipe(first())
-      .subscribe(async (list) => {
-        if (!list.songs) list.songs = [];
-
-        const songsToAdd = this.selectedSongs
-          .filter((id) => !list.songs.some((song) => song.songId === id))
-          .map((id) => ({ songId: id, section: 'Todas las Canciones' }));
-
-        if (songsToAdd.length > 0) {
-          const updatedSongs = [...list.songs, ...songsToAdd];
-
-          this.firestore
-            .updateSongsInList(listId, updatedSongs)
-            .then(async () => {
-              console.log('Canciones añadidas con éxito');
-              await this.presentToast(songsToAdd.length);
-              this.selectedSongs = []; // Clean the array to hide the banner
-            })
-            .catch((error) => {
-              console.error('Error updating list:', error);
-            });
-        } else {
-          console.log('No hay nuevas canciones para agregar.');
-        }
+  deleteSelectedLists() {
+    this.lists
+      .filter(list => list.selected)
+      .forEach(list => {
+        this.firestore
+          .deleteList(list)
+          .catch(error => console.error('Error deleting list:', error));
       });
+    this.cancelSelection();
+    this.presentToast('Lista(s) eliminada(s) correctamente');
   }
 
-  async presentToast(numSongs: number, type: 'success' | 'error' | 'info' = 'success') {
-    const messages = {
-      success: `✓ ${numSongs} canción(es) añadidas a la lista`,
-      error: 'Ocurrió un error al añadir las canciones',
-      info: `${numSongs} canción(es) ya estaban en la lista`
-    };
+  async presentToast(message: string, type: 'success' | 'error' = 'success') {
     const toast = await this.toastController.create({
-      message: messages[type],
+      message,
       duration: 3000,
       position: 'bottom',
       cssClass: `app-toast toast-${type}`,
