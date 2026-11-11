@@ -1,4 +1,5 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
+import { ALL_SONGS_SECTION } from 'src/app/constants/sections';
 import { Router } from '@angular/router';
 import { AuthService } from 'src/app/services/auth.service';
 import { Song } from 'src/app/interfaces/song';
@@ -248,7 +249,7 @@ export class DashboardPage implements OnInit, OnDestroy {
 
       const songsToAdd = selectedIds
         .filter(id => !currentList.songs.some((s: any) => s.songId === id))
-        .map(id => ({ songId: id, section: 'Todas las Canciones' }));
+        .map(id => ({ songId: id, section: ALL_SONGS_SECTION }));
 
       if (songsToAdd.length > 0) {
         const updatedSongs = [...currentList.songs, ...songsToAdd];

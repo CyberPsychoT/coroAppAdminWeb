@@ -8,6 +8,7 @@ import { NavController, ToastController } from '@ionic/angular';
 import { Subscription } from 'rxjs';
 import { switchMap, first, map, tap } from 'rxjs/operators';
 import { Location } from '@angular/common';
+import { ALL_SONGS_SECTION, LEGACY_SECTIONS } from 'src/app/constants/sections';
 
 @Component({
   selector: 'app-list',
@@ -26,6 +27,11 @@ export class ListPage implements OnInit, OnDestroy {
   songSearchTerm = '';
   isLoadingSongs = false;
   private songsSub?: Subscription;
+
+  // ── Modal: Categorías de la lista ─────────────────
+  showSectionsModal = false;
+  editedSections: string[] = [];
+  isSavingSections = false;
 
   constructor(
     private activatedRoute: ActivatedRoute,
@@ -58,33 +64,28 @@ export class ListPage implements OnInit, OnDestroy {
     listSongs.forEach(listSong => {
       this.firestoreService.getSongById(listSong.songId).subscribe((song: Song) => {
         if (song) {
-          const section = this.sections.find(sec => sec.name === listSong.section);
-          if (section) {
-            section.songs.push({ ...song, section: listSong.section });
-          }
+          // Si la categoría ya no está en la lista, la canción cae en "Todas las Canciones"
+          const section =
+            this.sections.find(sec => sec.name === listSong.section) ??
+            this.sections.find(sec => sec.name === ALL_SONGS_SECTION);
+          section.songs.push({ ...song, section: section.name });
         }
       });
     });
   }
 
+  // Categorías de la lista; las listas antiguas sin `sections` usan las predeterminadas
+  get listSections(): string[] {
+    return this.list?.sections ?? LEGACY_SECTIONS;
+  }
+
   initializeSections() {
-    this.sections = [
-      { name: 'Todas las Canciones', songs: [], open: true },
-      { name: 'Entrada', songs: [], open: false },
-      { name: 'Canto de Perdón', songs: [], open: false },
-      { name: 'Gloria', songs: [], open: false },
-      { name: 'Salmo', songs: [], open: false },
-      { name: 'Antes del Evangelio', songs: [], open: false },
-      { name: 'Después del Evangelio', songs: [], open: false },
-      { name: 'Ofertorio', songs: [], open: false },
-      { name: 'Santo', songs: [], open: false },
-      { name: 'Prefacio', songs: [], open: false },
-      { name: 'Padre Nuestro', songs: [], open: false },
-      { name: 'Canto de paz', songs: [], open: false },
-      { name: 'Cordero', songs: [], open: false },
-      { name: 'Comunión', songs: [], open: false },
-      { name: 'Canto Final', songs: [], open: false },
-    ];
+    const openState = new Map(this.sections.map(sec => [sec.name, sec.open]));
+    this.sections = [ALL_SONGS_SECTION, ...this.listSections].map((name, i) => ({
+      name,
+      songs: [],
+      open: openState.get(name) ?? i === 0,
+    }));
   }
 
   assignSongToSection(songId: string, newSectionName: string) {
@@ -195,7 +196,7 @@ export class ListPage implements OnInit, OnDestroy {
 
     const songsToAdd: ListSong[] = selected
       .filter(s => !this.isSongInList(s.id))
-      .map(s => ({ songId: s.id, section: 'Todas las Canciones' }));
+      .map(s => ({ songId: s.id, section: ALL_SONGS_SECTION }));
 
     if (songsToAdd.length === 0) {
       this.closeAddSongsModal();
@@ -211,6 +212,37 @@ export class ListPage implements OnInit, OnDestroy {
     } catch (error) {
       console.error('Error adding songs:', error);
       this.presentToast('Error al añadir las canciones', 'error');
+    }
+  }
+
+  // ── Modal: Categorías de la lista ─────────────────
+  openSectionsModal() {
+    this.editedSections = [...this.listSections];
+    this.showSectionsModal = true;
+  }
+
+  closeSectionsModal() {
+    this.showSectionsModal = false;
+  }
+
+  async saveSections() {
+    if (!this.list || !this.list.id || this.isSavingSections) return;
+
+    // Canciones en categorías quitadas vuelven a "Todas las Canciones"
+    const songs = (this.list.songs || []).map(ls =>
+      this.editedSections.includes(ls.section) ? ls : { ...ls, section: ALL_SONGS_SECTION }
+    );
+
+    this.isSavingSections = true;
+    try {
+      await this.firestoreService.updateList(this.list.id, { sections: this.editedSections, songs });
+      this.closeSectionsModal();
+      this.presentToast('✓ Categorías de la lista actualizadas', 'success');
+    } catch (error) {
+      console.error('Error updating sections:', error);
+      this.presentToast('Error al guardar las categorías', 'error');
+    } finally {
+      this.isSavingSections = false;
     }
   }
 

@@ -10,6 +10,10 @@
         <h1 class="page-title">{{ list?.name || 'Cargando...' }}</h1>
         <p class="page-subtitle">Organiza las canciones de la misa</p>
       </div>
+      <button class="edit-sections-btn" (click)="openSectionsModal()" [disabled]="!list" aria-label="Editar categorías de la lista">
+        <ion-icon name="pricetags-outline" aria-hidden="true"></ion-icon>
+        <span>Categorías</span>
+      </button>
     </header>
 
     <!-- Acordeón de Secciones -->
@@ -162,6 +166,52 @@
         aria-label="Confirmar agregar canciones seleccionadas">
         <ion-icon name="add-circle-outline" aria-hidden="true"></ion-icon>
         Añadir {{ getModalSelectedCount() > 0 ? getModalSelectedCount() + ' canción' + (getModalSelectedCount() !== 1 ? 'es' : '') : 'canciones' }}
+      </button>
+    </div>
+  </div>
+
+  <!-- ══ Bottom Sheet: Categorías de la lista ═════════════ -->
+  <div
+    class="modal-backdrop"
+    [class.visible]="showSectionsModal"
+    (click)="closeSectionsModal()"
+    aria-hidden="true">
+  </div>
+
+  <div
+    class="add-songs-sheet"
+    [class.visible]="showSectionsModal"
+    role="dialog"
+    aria-modal="true"
+    aria-label="Editar categorías de la lista">
+
+    <div class="sheet-handle" aria-hidden="true"></div>
+
+    <div class="sheet-header">
+      <div class="sheet-header-info">
+        <h2 class="sheet-title">Categorías de la lista</h2>
+        <p class="sheet-subtitle">Elige solo las que necesitas para esta lista</p>
+      </div>
+      <button class="sheet-close-btn" (click)="closeSectionsModal()" aria-label="Cerrar">
+        <ion-icon name="close-outline"></ion-icon>
+      </button>
+    </div>
+
+    <div class="sheet-list sections-sheet-body">
+      <app-category-picker
+        *ngIf="showSectionsModal"
+        [selected]="editedSections"
+        (selectedChange)="editedSections = $event">
+      </app-category-picker>
+    </div>
+
+    <div class="sheet-footer">
+      <button
+        class="confirm-add-btn"
+        [disabled]="isSavingSections"
+        (click)="saveSections()">
+        <ion-icon name="save-outline" aria-hidden="true"></ion-icon>
+        Guardar categorías
       </button>
     </div>
   </div>

@@ -23,6 +23,14 @@
           </ion-item>
         </div>
 
+        <div class="form-section">
+          <h2 class="section-title">Categorías</h2>
+          <app-category-picker
+            [selected]="formAddList.get('sections')?.value || []"
+            (selectedChange)="onSectionsChange($event)">
+          </app-category-picker>
+        </div>
+
         <!-- Acciones del Formulario -->
         <div class="form-actions">
           <ion-button class="cancel-btn" fill="outline" (click)="goToListWeek()">Cancelar</ion-button>

@@ -8,11 +8,16 @@ import {
   deleteDoc,
   docData,
   updateDoc,
+  writeBatch,
+  WriteBatch,
 } from '@angular/fire/firestore';
-import { Observable } from 'rxjs';
+import { Observable, firstValueFrom } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { Song } from '../interfaces/song';
 import { List } from '../interfaces/list';
 import { ListSong } from '../interfaces/list-song';
+import { Category } from '../interfaces/category';
+import { ALL_SONGS_SECTION, LEGACY_SECTIONS } from '../constants/sections';
 import { Subject } from 'rxjs';
 
 @Injectable({
@@ -102,6 +107,87 @@ export class FirestoreService {
     const listDocRef = doc(this.firestore, `lists/${listId}`);
     console.log('Updating list with songs and sections:', songs);
     return updateDoc(listDocRef, { songs }); // Asegúrate de que 'songs' es la clave correcta en Firestore.
+  }
+
+  //Categorías
+  addCategory(category: Category) {
+    const categoryRef = collection(this.firestore, 'categories');
+    return addDoc(categoryRef, category);
+  }
+
+  //Trae todas las categorías ordenadas (las que no tienen orden van al final, por nombre)
+  getCategories(): Observable<Category[]> {
+    const categoryRef = collection(this.firestore, 'categories');
+    return (collectionData(categoryRef, { idField: 'id' }) as Observable<Category[]>).pipe(
+      map(categories =>
+        categories.sort(
+          (a, b) =>
+            (a.order ?? Number.MAX_SAFE_INTEGER) - (b.order ?? Number.MAX_SAFE_INTEGER) ||
+            a.name.localeCompare(b.name)
+        )
+      )
+    );
+  }
+
+  // Guarda el orden del catálogo según la posición en el arreglo
+  updateCategoriesOrder(categories: Category[]) {
+    const batch = writeBatch(this.firestore);
+    categories.forEach((category, index) => {
+      batch.update(doc(this.firestore, `categories/${category.id}`), { order: index });
+    });
+    return batch.commit();
+  }
+
+  // Renombra la categoría y la actualiza en todas las listas que la usan
+  async renameCategory(category: Category, newName: string) {
+    const batches = await this.buildListSectionBatches(category.name, newName);
+    batches[0].update(doc(this.firestore, `categories/${category.id}`), { name: newName });
+    await Promise.all(batches.map(b => b.commit()));
+  }
+
+  // Elimina la categoría y la quita de las listas (sus canciones pasan a "Todas las Canciones")
+  async deleteCategory(category: Category) {
+    const batches = await this.buildListSectionBatches(category.name, null);
+    batches[0].delete(doc(this.firestore, `categories/${category.id}`));
+    await Promise.all(batches.map(b => b.commit()));
+  }
+
+  // Cantidad de listas que usan una categoría
+  async countListsUsingCategory(name: string): Promise<number> {
+    const lists = await firstValueFrom(this.getLists());
+    return lists.filter(list => this.listUsesSection(list, name)).length;
+  }
+
+  private listUsesSection(list: List, name: string): boolean {
+    return (list.sections ?? LEGACY_SECTIONS).includes(name) ||
+      (list.songs || []).some(ls => ls.section === name);
+  }
+
+  // Reemplaza (newName) o quita (null) una categoría en todas las listas
+  private async buildListSectionBatches(oldName: string, newName: string | null): Promise<WriteBatch[]> {
+    const lists = await firstValueFrom(this.getLists());
+    const batches = [writeBatch(this.firestore)];
+    let ops = 1; // operación sobre la categoría misma
+
+    lists.filter(list => this.listUsesSection(list, oldName)).forEach(list => {
+      // Las listas antiguas sin `sections` se materializan con las predeterminadas
+      const currentSections = list.sections ?? LEGACY_SECTIONS;
+      const sections = newName === null
+        ? currentSections.filter(name => name !== oldName)
+        : [...new Set(currentSections.map(name => (name === oldName ? newName : name)))];
+      const songs = (list.songs || []).map(ls =>
+        ls.section === oldName ? { ...ls, section: newName ?? ALL_SONGS_SECTION } : ls
+      );
+
+      if (ops >= 450) {
+        batches.push(writeBatch(this.firestore));
+        ops = 0;
+      }
+      batches[batches.length - 1].update(doc(this.firestore, `lists/${list.id}`), { sections, songs });
+      ops++;
+    });
+
+    return batches;
   }
 
   // Actualizar parámetros de la app (OTA)

@@ -15,6 +15,7 @@ export class AddListComponent implements OnInit {
     this.formAddList = new FormGroup({
       name: new FormControl('', Validators.required),
       songs: new FormControl([]), // Se cambió 'songIds' a 'songs' para coincidir con la interfaz
+      sections: new FormControl([]), // Categorías elegidas para esta lista
       createdAt: new FormControl(new Date()),
       selected: new FormControl(false),
       status: new FormControl(true),
@@ -38,6 +39,10 @@ export class AddListComponent implements OnInit {
     } else {
       console.error('Failed to add List');
     }
+  }
+
+  onSectionsChange(sections: string[]) {
+    this.formAddList.patchValue({ sections });
   }
 
   goToListWeek() {

@@ -1,0 +1,56 @@
+<div class="category-picker">
+
+  <!-- Categorías elegidas para la lista (en orden de visualización) -->
+  <div class="picker-label-row">
+    <p class="picker-label">Categorías de esta lista · arrastra para ordenar</p>
+    <button type="button" class="link-btn" *ngIf="selected.length > 1" (click)="applyCatalogOrder()">
+      Usar orden del catálogo
+    </button>
+  </div>
+  <ion-list class="selected-list" lines="none" *ngIf="selected.length > 0; else noneSelected">
+    <ion-reorder-group [disabled]="false" (ionItemReorder)="onReorder($any($event))">
+      <ion-item class="selected-item" *ngFor="let name of selected; let i = index">
+        <span class="order" slot="start">{{ i + 1 }}</span>
+        <ion-label class="name">{{ name }}</ion-label>
+        <button type="button" class="icon-btn danger" (click)="remove(name)" [attr.aria-label]="'Quitar ' + name">
+          <ion-icon name="close-outline"></ion-icon>
+        </button>
+        <ion-reorder slot="end"></ion-reorder>
+      </ion-item>
+    </ion-reorder-group>
+  </ion-list>
+  <ng-template #noneSelected>
+    <p class="hint">Ninguna categoría elegida. Las canciones quedarán en "Todas las Canciones".</p>
+  </ng-template>
+
+  <!-- Catálogo disponible -->
+  <p class="picker-label">Agregar desde el catálogo</p>
+  <div class="chips" *ngIf="available.length > 0; else noneAvailable">
+    <button type="button" class="chip" *ngFor="let category of available" (click)="add(category.name)">
+      <ion-icon name="add" aria-hidden="true"></ion-icon>
+      {{ category.name }}
+    </button>
+  </div>
+  <ng-template #noneAvailable>
+    <p class="hint">No hay más categorías en el catálogo.</p>
+  </ng-template>
+
+  <!-- Crear nueva -->
+  <p class="picker-label">¿No existe? Créala</p>
+  <div class="create-row">
+    <input
+      type="text"
+      placeholder="Ej: Prueba1"
+      [(ngModel)]="newCategoryName"
+      [ngModelOptions]="{ standalone: true }"
+      (keydown.enter)="$event.preventDefault(); createCategory()"
+      [disabled]="isSaving"
+      maxlength="60"
+      aria-label="Nombre de la nueva categoría">
+    <button type="button" class="create-btn" (click)="createCategory()" [disabled]="!newCategoryName.trim() || isSaving">
+      Crear y agregar
+    </button>
+  </div>
+  <p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
+
+</div>

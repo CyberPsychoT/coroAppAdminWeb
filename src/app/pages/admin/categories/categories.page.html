@@ -1,0 +1,67 @@
+<ion-content [fullscreen]="true">
+  <div class="page-container">
+
+    <header class="page-header">
+      <div class="header-text">
+        <h1 class="page-title">Categorías</h1>
+        <p class="page-subtitle">Crea las secciones que podrás usar en tus listas (Entrada, Ofertorio...)</p>
+      </div>
+    </header>
+
+    <div class="content-wrapper">
+      <!-- Crear categoría -->
+      <form class="add-category" (ngSubmit)="addCategory()">
+        <input
+          type="text"
+          name="newCategoryName"
+          placeholder="Nueva categoría (Ej: Entrada, Ofertorio, Prueba1...)"
+          [(ngModel)]="newCategoryName"
+          [disabled]="isSaving"
+          aria-label="Nombre de la nueva categoría"
+          maxlength="60">
+        <button type="submit" class="add-btn" [disabled]="!newCategoryName.trim() || isSaving">
+          <ion-icon name="add" aria-hidden="true"></ion-icon>
+          Crear
+        </button>
+      </form>
+
+      <!-- Listado -->
+      <div class="loading-state" *ngIf="isLoading">
+        <div class="spinner"></div>
+        <p>Cargando categorías...</p>
+      </div>
+
+      <ng-container *ngIf="!isLoading">
+        <ng-container *ngIf="categories.length > 0; else emptyState">
+          <p class="order-hint">
+            <ion-icon name="reorder-three-outline" aria-hidden="true"></ion-icon>
+            Arrastra para definir el orden del catálogo. Es el orden sugerido al armar las listas.
+          </p>
+          <ion-list class="category-list" lines="none">
+            <ion-reorder-group [disabled]="false" (ionItemReorder)="onReorder($any($event))">
+              <ion-item class="category-item" *ngFor="let category of categories; let i = index; trackBy: trackById">
+                <span class="order" slot="start">{{ i + 1 }}</span>
+                <ion-label class="category-name">{{ category.name }}</ion-label>
+                <ion-button fill="clear" class="action-btn" (click)="renameCategory(category)" [attr.aria-label]="'Renombrar ' + category.name">
+                  <ion-icon slot="icon-only" name="create-outline"></ion-icon>
+                </ion-button>
+                <ion-button fill="clear" color="danger" class="action-btn" (click)="deleteCategory(category)" [attr.aria-label]="'Eliminar ' + category.name">
+                  <ion-icon slot="icon-only" name="trash-outline"></ion-icon>
+                </ion-button>
+                <ion-reorder slot="end"></ion-reorder>
+              </ion-item>
+            </ion-reorder-group>
+          </ion-list>
+        </ng-container>
+      </ng-container>
+
+      <ng-template #emptyState>
+        <div class="empty-state">
+          <ion-icon name="pricetags-outline"></ion-icon>
+          <p>Aún no hay categorías. Crea la primera arriba.</p>
+        </div>
+      </ng-template>
+    </div>
+
+  </div>
+</ion-content>

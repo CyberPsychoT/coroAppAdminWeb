@@ -104,7 +104,14 @@ export class UpdateAppPage implements OnInit {
         (error) => {
           console.error('Upload error:', error);
           this.isUploading = false;
-          this.presentToast('Error al subir el archivo', 'danger');
+          // Storage queda bloqueado si la facturación del proyecto está desactivada
+          const billingBlocked = /billing|402|403/i.test(`${error?.code} ${error?.message} ${error?.customData?.serverResponse}`);
+          this.presentToast(
+            billingBlocked
+              ? 'Firebase Storage está bloqueado: la facturación del proyecto está desactivada. Reactívala en la consola de Google Cloud.'
+              : 'Error al subir el archivo',
+            'danger'
+          );
         },
         async () => {
           // 2. Obtener URL de descarga

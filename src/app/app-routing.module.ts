@@ -46,6 +46,12 @@ const routes: Routes = [
     component: AddListComponent,
   },
   {
+    path: 'admin/categories',
+    loadChildren: () => import('./pages/admin/categories/categories.module').then( m => m.CategoriesPageModule),
+    ...canActivate(() => redirectUnauthorizedTo(['auth/login'])),
+    canActivate: [ReactivateMenuGuard],
+  },
+  {
     path: 'admin/update-app',
     loadChildren: () => import('./pages/admin/update-app/update-app.module').then( m => m.UpdateAppPageModule),
     ...canActivate(() => redirectUnauthorizedTo(['auth/login'])),

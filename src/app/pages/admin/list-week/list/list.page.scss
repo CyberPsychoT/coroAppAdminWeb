@@ -48,6 +48,31 @@ ion-content {
   }
 }
 
+// ── Botón editar categorías ──────────────────────
+.edit-sections-btn {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 12px;
+  border: 1.5px solid rgba(var(--ion-color-primary-rgb), 0.35);
+  background: rgba(var(--ion-color-primary-rgb), 0.08);
+  color: var(--ion-color-primary);
+  font-weight: 700;
+  font-size: 0.85rem;
+  cursor: pointer;
+  flex-shrink: 0;
+
+  ion-icon { font-size: 1.1rem; }
+  &:hover:not(:disabled) { background: rgba(var(--ion-color-primary-rgb), 0.16); }
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+}
+
+.sections-sheet-body {
+  padding: 0 20px 16px;
+}
+
 // ── Acordeón ─────────────────────────────────────
 .sections-accordion {
   padding: 16px 20px;

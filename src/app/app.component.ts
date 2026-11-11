@@ -13,6 +13,7 @@ export class AppComponent implements OnInit, OnDestroy {
   public appPages = [
     { title: 'Canciones', url: '/admin/dashboard', icon: 'musical-notes' },
     { title: 'Lista semanal', url: '/admin/list-week', icon: 'calendar' },
+    { title: 'Categorías', url: '/admin/categories', icon: 'pricetags' },
   ];
 
   userName: string | null = null;
